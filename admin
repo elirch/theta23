@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>θ23 — Event Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080a0e;
+    --surface: #0d1117;
+    --surface2: #111722;
+    --border: #1e2a3a;
+    --border2: #2a3a50;
+    --text: #e8edf5;
+    --text-dim: #a8b8cc;
+    --text-muted: #6b7a8f;
+    --accent: #00d4ff;
+    --green: #00e676;
+    --red: #ff4757;
+    --orange: #ff6b35;
+    --yellow: #ffd32a;
+    --gold: #f59e0b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; }
+
+  /* HEADER */
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 32px; height:56px;
+    background:var(--surface); border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:100;
+  }
+  .logo { font-size:20px; font-weight:800; letter-spacing:0.06em; }
+  .logo span { color:var(--accent); }
+  .header-tag {
+    font-family:'Space Mono',monospace; font-size:10px;
+    color:var(--orange); background:rgba(255,107,53,0.1);
+    border:1px solid rgba(255,107,53,0.3); padding:3px 10px; border-radius:4px;
+    letter-spacing:0.15em; text-transform:uppercase;
+  }
+
+  /* LAYOUT */
+  .container { max-width:960px; margin:0 auto; padding:40px 32px; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+    letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted);
+    margin-bottom:20px; display:flex; align-items:center; gap:12px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* FORM */
+  .form-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:28px; margin-bottom:32px;
+  }
+
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .form-grid.full { grid-template-columns:1fr; }
+
+  .field { display:flex; flex-direction:column; gap:8px; }
+  .field.span2 { grid-column:span 2; }
+
+  label {
+    font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted);
+  }
+
+  input, textarea, select {
+    background:var(--surface2); border:1px solid var(--border2);
+    border-radius:5px; padding:10px 14px;
+    font-family:'Space Mono',monospace; font-size:12px; color:var(--text);
+    outline:none; transition:border-color 0.15s;
+    width:100%;
+  }
+  input:focus, textarea:focus, select:focus { border-color:var(--accent); }
+  textarea { resize:vertical; min-height:80px; line-height:1.6; }
+  select option { background:var(--surface2); }
+
+  /* Severity selector */
+  .severity-row { display:flex; gap:8px; }
+  .sev-btn {
+    flex:1; padding:8px; border-radius:5px; border:1px solid var(--border2);
+    background:var(--surface2); font-family:'Space Mono',monospace;
+    font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    cursor:pointer; transition:all 0.15s; color:var(--text-muted);
+  }
+  .sev-btn:hover { border-color:var(--border2); background:var(--surface); }
+  .sev-btn.active-critical { background:rgba(255,71,87,0.15); border-color:var(--red); color:var(--red); }
+  .sev-btn.active-high { background:rgba(255,107,53,0.15); border-color:var(--orange); color:var(--orange); }
+  .sev-btn.active-medium { background:rgba(255,211,42,0.15); border-color:var(--yellow); color:var(--yellow); }
+  .sev-btn.active-low { background:rgba(74,158,255,0.15); border-color:#4a9eff; color:#4a9eff; }
+
+  /* Map picker */
+  .map-picker-wrap { position:relative; border-radius:6px; overflow:hidden; border:1px solid var(--border2); }
+  #mini-map { width:100%; height:220px; }
+  .map-hint {
+    position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+    background:rgba(13,17,23,0.9); border:1px solid var(--border2);
+    border-radius:4px; padding:6px 12px;
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted);
+    pointer-events:none;
+  }
+  .coords-display {
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--accent);
+    margin-top:6px;
+  }
+
+  /* Tickers input */
+  .ticker-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .ticker-tag {
+    display:inline-flex; align-items:center; gap:5px;
+    background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.25);
+    border-radius:4px; padding:3px 8px;
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--accent);
+    font-weight:700;
+  }
+  .ticker-tag .remove {
+    cursor:pointer; color:var(--text-muted); font-size:12px; line-height:1;
+  }
+  .ticker-tag .remove:hover { color:var(--red); }
+  .ticker-input-row { display:flex; gap:8px; }
+  .ticker-input-row input { flex:1; }
+  .add-ticker-btn {
+    padding:10px 16px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.25);
+    border-radius:5px; color:var(--accent); font-family:'Space Mono',monospace;
+    font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap;
+    transition:all 0.15s;
+  }
+  .add-ticker-btn:hover { background:rgba(0,212,255,0.2); }
+
+  /* Action buttons */
+  .actions { display:flex; gap:12px; margin-top:24px; }
+  .btn-primary {
+    padding:12px 28px; background:var(--accent); border:none; border-radius:5px;
+    color:#000; font-family:'Syne',sans-serif; font-size:13px; font-weight:800;
+    cursor:pointer; letter-spacing:0.05em; transition:all 0.15s;
+  }
+  .btn-primary:hover { background:#00bfe8; transform:translateY(-1px); }
+  .btn-secondary {
+    padding:12px 28px; background:transparent; border:1px solid var(--border2);
+    border-radius:5px; color:var(--text-dim); font-family:'Syne',sans-serif;
+    font-size:13px; font-weight:700; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-secondary:hover { border-color:var(--border2); background:var(--surface2); }
+
+  /* OUTPUT */
+  .output-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; overflow:hidden; margin-bottom:32px;
+    display:none;
+  }
+  .output-card.visible { display:block; }
+  .output-header {
+    padding:14px 20px; background:rgba(0,212,255,0.06);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .output-label {
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--accent);
+    letter-spacing:0.15em; text-transform:uppercase;
+    display:flex; align-items:center; gap:8px;
+  }
+  .output-label::before { content:''; width:6px; height:6px; background:var(--accent); border-radius:50%; }
+  .copy-btn {
+    padding:6px 14px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.25);
+    border-radius:4px; color:var(--accent); font-family:'Space Mono',monospace;
+    font-size:10px; font-weight:700; cursor:pointer; transition:all 0.15s;
+    letter-spacing:0.08em;
+  }
+  .copy-btn:hover { background:rgba(0,212,255,0.2); }
+  .copy-btn.copied { color:var(--green); border-color:rgba(0,230,118,0.4); background:rgba(0,230,118,0.08); }
+  .output-code {
+    padding:20px; font-family:'Space Mono',monospace; font-size:11px;
+    color:var(--text-dim); line-height:1.7; white-space:pre; overflow-x:auto;
+    max-height:320px; overflow-y:auto;
+    scrollbar-width:thin; scrollbar-color:var(--border2) transparent;
+  }
+
+  /* INSTRUCTIONS */
+  .instructions {
+    background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.1);
+    border-radius:8px; padding:20px 24px; margin-bottom:32px;
+  }
+  .instructions ol { padding-left:20px; }
+  .instructions li {
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim);
+    line-height:2; letter-spacing:0.02em;
+  }
+  .instructions li strong { color:var(--accent); }
+
+  /* EXISTING EVENTS */
+  .events-grid { display:flex; flex-direction:column; gap:10px; }
+  .event-row {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:6px; padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .event-row:hover { border-color:var(--border2); }
+  .event-row-left { flex:1; }
+  .event-row-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
+  .event-row-meta { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted); }
+  .event-row-sev {
+    font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
+    padding:2px 8px; border-radius:3px; text-transform:uppercase; letter-spacing:0.1em;
+    flex-shrink:0;
+  }
+  .sev-critical { background:rgba(255,71,87,0.12); color:var(--red); border:1px solid rgba(255,71,87,0.3); }
+  .sev-high { background:rgba(255,107,53,0.12); color:var(--orange); border:1px solid rgba(255,107,53,0.3); }
+  .sev-medium { background:rgba(255,211,42,0.12); color:var(--yellow); border:1px solid rgba(255,211,42,0.3); }
+  .sev-low { background:rgba(74,158,255,0.12); color:#4a9eff; border:1px solid rgba(74,158,255,0.3); }
+
+  /* Delete button */
+  .delete-btn {
+    padding:5px 12px; background:rgba(255,71,87,0.08); border:1px solid rgba(255,71,87,0.25);
+    border-radius:4px; color:var(--red); font-family:'Space Mono',monospace;
+    font-size:9px; font-weight:700; cursor:pointer; letter-spacing:0.08em;
+    text-transform:uppercase; transition:all 0.15s; flex-shrink:0;
+  }
+  .delete-btn:hover { background:rgba(255,71,87,0.18); }
+
+  /* Toast */
+  .toast {
+    position:fixed; bottom:32px; right:32px; z-index:9999;
+    background:var(--surface); border:1px solid var(--green);
+    border-radius:6px; padding:12px 20px;
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--green);
+    display:flex; align-items:center; gap:8px;
+    transform:translateY(80px); opacity:0; transition:all 0.3s ease;
+    pointer-events:none;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="logo">θ<span>23</span></div>
+  <div class="header-tag">⚡ Event Editor — Internal</div>
+  <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted)" id="hclock"></div>
+</header>
+
+<div class="container">
+
+  <!-- INSTRUCTIONS -->
+  <div class="instructions">
+    <div class="section-title">How to add an event</div>
+    <ol>
+      <li>Fill in the form below</li>
+      <li>Click <strong>Generate Code</strong></li>
+      <li>Copy the output → paste it into <strong>index.html</strong> on GitHub (inside the EVENTS array, before the last <code>]</code>)</li>
+      <li>Commit → live in 30 seconds</li>
+    </ol>
+  </div>
+
+  <!-- FORM -->
+  <div class="section-title">New Event</div>
+  <div class="form-card">
+
+    <div class="form-grid">
+      <div class="field span2">
+        <label>Event Title</label>
+        <input type="text" id="f-title" placeholder="e.g. North Korea ICBM Test Launch">
+      </div>
+
+      <div class="field">
+        <label>Region</label>
+        <input type="text" id="f-region" placeholder="e.g. East Asia">
+      </div>
+
+      <div class="field">
+        <label>Severity</label>
+        <div class="severity-row">
+          <button class="sev-btn" data-sev="critical" onclick="setSev('critical')">Critical</button>
+          <button class="sev-btn" data-sev="high" onclick="setSev('high')">High</button>
+          <button class="sev-btn active-medium" data-sev="medium" onclick="setSev('medium')">Medium</button>
+          <button class="sev-btn" data-sev="low" onclick="setSev('low')">Low</button>
+        </div>
+        <input type="hidden" id="f-severity" value="medium">
+      </div>
+
+      <div class="field span2">
+        <label>Summary (1-2 sentences — factual, no recommendations)</label>
+        <textarea id="f-summary" placeholder="Brief factual description of the event and its current status..."></textarea>
+      </div>
+
+      <div class="field span2">
+        <label>Historical Context (correlations & historical data — no advice)</label>
+        <textarea id="f-context" placeholder="Historical correlation data between this type of event and the linked assets. e.g. 'Historically, X type events have correlated with Y% moves in Z asset...'" style="min-height:100px"></textarea>
+      </div>
+
+      <div class="field span2">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="f-tags" placeholder="e.g. Armed Conflict, Energy Risk, NATO">
+      </div>
+
+      <div class="field span2">
+        <label>Linked Asset Tickers (Polygon symbols)</label>
+        <div class="ticker-input-row">
+          <input type="text" id="f-ticker-input" placeholder="e.g. USO, LMT, NVDA..." onkeydown="if(event.key==='Enter'||event.key===',')addTicker()">
+          <button class="add-ticker-btn" onclick="addTicker()">+ Add</button>
+        </div>
+        <div class="ticker-tags" id="ticker-tags"></div>
+      </div>
+
+      <div class="field span2">
+        <label>Asset Group Label</label>
+        <input type="text" id="f-group" placeholder="e.g. Energy, Defense, Semiconductors">
+      </div>
+
+      <div class="field span2">
+        <label>Location — Click on map to set coordinates</label>
+        <div class="map-picker-wrap">
+          <div id="mini-map"></div>
+          <div class="map-hint">🖱 Click anywhere on the map</div>
+        </div>
+        <div class="coords-display" id="coords-display">Lat: — &nbsp; Lng: —</div>
+        <input type="hidden" id="f-lat" value="">
+        <input type="hidden" id="f-lng" value="">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="generateCode()">⚡ Generate Code</button>
+      <button class="btn-secondary" onclick="resetForm()">Reset</button>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output-card" id="output-card">
+    <div class="output-header">
+      <div class="output-label">Generated Code — paste into index.html EVENTS array</div>
+      <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
+    </div>
+    <div class="output-code" id="output-code"></div>
+  </div>
+
+  <!-- EXISTING EVENTS (read from localStorage drafts) -->
+  <div class="section-title" style="margin-top:8px">Current Events on Map</div>
+  <div class="events-grid" id="events-grid"></div>
+
+</div>
+
+<div class="toast" id="toast">✓ Copied to clipboard</div>
+
+<script>
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
+setInterval(() => {
+  const n = new Date();
+  document.getElementById('hclock').textContent =
+    `${String(n.getUTCHours()).padStart(2,'0')}:${String(n.getUTCMinutes()).padStart(2,'0')} UTC`;
+}, 1000);
+
+// ─── MAP ─────────────────────────────────────────────────────────────────────
+const miniMap = L.map('mini-map', { center:[20,15], zoom:1.5, zoomControl:true, attributionControl:false });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains:'abcd' }).addTo(miniMap);
+
+let pickedMarker = null;
+miniMap.on('click', e => {
+  const { lat, lng } = e.latlng;
+  document.getElementById('f-lat').value = lat.toFixed(2);
+  document.getElementById('f-lng').value = lng.toFixed(2);
+  document.getElementById('coords-display').innerHTML = `Lat: <strong>${lat.toFixed(2)}</strong> &nbsp; Lng: <strong>${lng.toFixed(2)}</strong>`;
+  if (pickedMarker) miniMap.removeLayer(pickedMarker);
+  pickedMarker = L.circleMarker([lat, lng], { radius:8, color:'#00d4ff', fillColor:'#00d4ff', fillOpacity:0.8, weight:2 }).addTo(miniMap);
+});
+
+// ─── SEVERITY ────────────────────────────────────────────────────────────────
+function setSev(val) {
+  document.getElementById('f-severity').value = val;
+  document.querySelectorAll('.sev-btn').forEach(b => {
+    b.className = 'sev-btn';
+    if (b.dataset.sev === val) b.classList.add(`active-${val}`);
+  });
+}
+
+// ─── TICKERS ─────────────────────────────────────────────────────────────────
+let tickers = [];
+
+function addTicker() {
+  const input = document.getElementById('f-ticker-input');
+  const vals = input.value.toUpperCase().split(/[,\s]+/).filter(Boolean);
+  vals.forEach(v => { if (v && !tickers.includes(v)) tickers.push(v); });
+  input.value = '';
+  renderTickers();
+}
+
+function removeTicker(sym) {
+  tickers = tickers.filter(t => t !== sym);
+  renderTickers();
+}
+
+function renderTickers() {
+  document.getElementById('ticker-tags').innerHTML = tickers.map(t =>
+    `<div class="ticker-tag">${t}<span class="remove" onclick="removeTicker('${t}')">×</span></div>`
+  ).join('');
+}
+
+// ─── GENERATE CODE ───────────────────────────────────────────────────────────
+let nextId = 100; // safe high number to avoid conflicts
+
+function generateCode() {
+  const title   = document.getElementById('f-title').value.trim();
+  const region  = document.getElementById('f-region').value.trim();
+  const severity = document.getElementById('f-severity').value;
+  const summary = document.getElementById('f-summary').value.trim();
+  const context = document.getElementById('f-context').value.trim();
+  const tagsRaw = document.getElementById('f-tags').value;
+  const group   = document.getElementById('f-group').value.trim() || 'Assets';
+  const lat     = document.getElementById('f-lat').value;
+  const lng     = document.getElementById('f-lng').value;
+
+  if (!title || !region || !summary || !lat || !lng || tickers.length === 0) {
+    alert('Please fill in: Title, Region, Summary, Tickers, and click on the map to set location.');
+    return;
+  }
+
+  const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+  const id = nextId++;
+
+  const code = `  ,{
+    id:${id}, lat:${lat}, lng:${lng},
+    title:"${title}",
+    region:"${region}", severity:"${severity}", date:"Ongoing",
+    summary:"${summary}",
+    tags:[${tags.map(t=>`"${t}"`).join(',')}],
+    tickers:[${tickers.map(t=>`"${t}"`).join(',')}],
+    tickerGroups:{ "${group}":[${tickers.map(t=>`"${t}"`).join(',')}] },
+    context:"${context}"
+  }`;
+
+  const card = document.getElementById('output-card');
+  card.classList.add('visible');
+  document.getElementById('output-code').textContent = code;
+  card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  // Save to localStorage
+  const drafts = JSON.parse(localStorage.getItem('theta23-events') || '[]');
+  drafts.push({ id, title, region, severity, lat, lng, tickers });
+  localStorage.setItem('theta23-events', JSON.stringify(drafts));
+  renderEventsList();
+}
+
+// ─── COPY ────────────────────────────────────────────────────────────────────
+function copyCode() {
+  const text = document.getElementById('output-code').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    showToast();
+  });
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── RESET ───────────────────────────────────────────────────────────────────
+function resetForm() {
+  ['f-title','f-region','f-summary','f-context','f-tags','f-group'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-lat').value = '';
+  document.getElementById('f-lng').value = '';
+  document.getElementById('coords-display').innerHTML = 'Lat: — &nbsp; Lng: —';
+  tickers = [];
+  renderTickers();
+  setSev('medium');
+  if (pickedMarker) { miniMap.removeLayer(pickedMarker); pickedMarker = null; }
+  document.getElementById('output-card').classList.remove('visible');
+}
+
+// ─── EVENTS LIST ─────────────────────────────────────────────────────────────
+const CURRENT_EVENTS = [
+  { id:1, title:"Russia-Ukraine Frontline Escalation", region:"Eastern Europe", severity:"critical" },
+  { id:2, title:"Strait of Hormuz Shipping Disruption", region:"Persian Gulf", severity:"critical" },
+  { id:3, title:"Taiwan Strait Military Exercises", region:"East Asia", severity:"high" },
+  { id:4, title:"Sahel Instability — Uranium Supply Concern", region:"West Africa", severity:"high" },
+  { id:5, title:"Argentina IMF Reform Program", region:"South America", severity:"medium" },
+  { id:6, title:"ECB Monetary Policy Pivot Signals", region:"Western Europe", severity:"medium" },
+  { id:7, title:"Bank of Japan Policy Normalization", region:"East Asia", severity:"medium" },
+  { id:8, title:"Middle East Ceasefire Fragility", region:"Middle East", severity:"critical" },
+  { id:9, title:"China Property Sector Debt Crisis", region:"East Asia", severity:"critical" },
+  { id:10, title:"India Infrastructure Supercycle", region:"South Asia", severity:"low" },
+  { id:11, title:"Brazil Election Uncertainty & Fiscal Risk", region:"South America", severity:"medium" },
+  { id:12, title:"Congo-Kenya Lithium Corridor Development", region:"East Africa", severity:"low" },
+  { id:13, title:"Turkey Inflation & Lira Stabilization", region:"E. Europe / Middle East", severity:"high" },
+  { id:14, title:"Saudi Arabia OPEC+ Production Strategy", region:"Gulf States", severity:"high" },
+  { id:15, title:"Nordic Offshore Wind Energy Expansion", region:"Northern Europe", severity:"low" },
+  { id:16, title:"Mexico Nearshoring Boom — China+1", region:"North America", severity:"low" },
+  { id:17, title:"South Africa Energy Crisis & BRICS", region:"Southern Africa", severity:"high" },
+  { id:18, title:"Russia Sanctions & Energy Rerouting", region:"Eastern Europe", severity:"high" },
+  { id:19, title:"South Korea Semiconductor Export Controls", region:"East Asia", severity:"medium" },
+  { id:20, title:"Australia-China Iron Ore Dependency", region:"Asia Pacific", severity:"medium" },
+  { id:21, title:"Iran Nuclear Program Escalation Risk", region:"Middle East", severity:"critical" },
+  { id:22, title:"South China Sea Territorial Disputes", region:"Southeast Asia", severity:"high" },
+];
+
+function renderEventsList() {
+  const drafts = JSON.parse(localStorage.getItem('theta23-events') || '[]');
+  const archived = JSON.parse(localStorage.getItem('theta23-archived') || '[]');
+  const all = [...CURRENT_EVENTS, ...drafts.filter(d => !CURRENT_EVENTS.find(e => e.id === d.id))]
+    .filter(ev => !archived.includes(ev.id));
+  document.getElementById('events-grid').innerHTML = all.map(ev => `
+    <div class="event-row" id="evrow-${ev.id}">
+      <div class="event-row-left">
+        <div class="event-row-title">${ev.title}</div>
+        <div class="event-row-meta">${ev.region} · ID ${ev.id}</div>
+      </div>
+      <span class="event-row-sev sev-${ev.severity}">${ev.severity}</span>
+      <button class="delete-btn" onclick="archiveEvent(${ev.id}, '${ev.title.replace(/'/g,"\'")}')">Remove</button>
+    </div>
+  `).join('');
+}
+
+function archiveEvent(id, title) {
+  if (!confirm(`Remove "${title}" from the map?`)) return;
+
+  // Generate removal code
+  const code = `// REMOVE event id:${id} — "${title}"
+// In index.html, delete the entire object block starting with:
+//   { id:${id}, lat:...}
+// Then commit to GitHub.`;
+
+  const card = document.getElementById('output-card');
+  card.classList.add('visible');
+  document.getElementById('output-code').textContent = code;
+
+  // Mark as archived locally
+  const archived = JSON.parse(localStorage.getItem('theta23-archived') || '[]');
+  archived.push(id);
+  localStorage.setItem('theta23-archived', JSON.stringify(archived));
+  renderEventsList();
+  card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+renderEventsList();
+</script>
+</body>
+</html>
