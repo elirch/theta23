@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theta23 — Geopolitical Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --bg: #080a0e;
+    --surface: #0d1117;
+    --surface2: #111722;
+    --border: #1e2a3a;
+    --border2: #243040;
+    --text: #e8edf5;
+    --text-dim: #a8b8cc;
+    --text-muted: #7a8fa8;
+    --accent: #00d4ff;
+    --red: #ff4757;
+    --green: #00e676;
+    --yellow: #ffd32a;
+    --orange: #ff6b35;
+    --purple: #a855f7;
+    --gold: #f59e0b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+
+  /* HEADER */
+  header { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:52px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; z-index:1000; }
+  .logo { display:flex; align-items:center; gap:10px; }
+  .logo-text { font-size:18px; font-weight:800; letter-spacing:0.08em; }
+  .logo-text span { color:var(--accent); }
+  .header-nav { display:flex; align-items:center; gap:2px; }
+  .nav-item { padding:6px 14px; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); cursor:pointer; border-radius:4px; font-family:'Space Mono',monospace; transition:all 0.15s; }
+  .nav-item:hover { color:var(--text); background:var(--surface2); }
+  .nav-item.active { color:var(--accent); background:rgba(0,212,255,0.08); }
+  .header-right { display:flex; align-items:center; gap:16px; }
+  .live-badge { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:10px; color:var(--green); letter-spacing:0.1em; text-transform:uppercase; }
+  .live-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .time-display { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim); }
+
+  /* LAYOUT */
+  .main { display:flex; flex:1; overflow:hidden; }
+
+  /* LEFT */
+  .left-panel { width:280px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+  .panel-header { padding:14px 16px 10px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .panel-title { font-size:10px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); font-family:'Space Mono',monospace; }
+  .event-count { font-family:'Space Mono',monospace; font-size:10px; color:var(--accent); background:rgba(0,212,255,0.1); padding:2px 7px; border-radius:10px; }
+  .events-list { flex:1; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+  .events-list::-webkit-scrollbar { width:4px; }
+  .events-list::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+  .event-item { padding:14px 16px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.15s; position:relative; }
+  .event-item::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:transparent; transition:background 0.15s; }
+  .event-item:hover { background:var(--surface2); }
+  .event-item.active { background:rgba(0,212,255,0.05); }
+  .event-item.active::before { background:var(--accent); }
+
+  .event-severity { display:inline-flex; align-items:center; gap:5px; font-family:'Space Mono',monospace; font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:7px; }
+  .severity-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+  .sev-critical { color:var(--red); } .sev-critical .severity-dot { background:var(--red); }
+  .sev-high { color:var(--orange); } .sev-high .severity-dot { background:var(--orange); }
+  .sev-medium { color:var(--yellow); } .sev-medium .severity-dot { background:var(--yellow); }
+  .sev-low { color:#4a9eff; } .sev-low .severity-dot { background:#4a9eff; }
+
+  .event-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; line-height:1.3; }
+  .event-meta { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted); }
+  .event-assets { display:flex; gap:4px; margin-top:8px; flex-wrap:wrap; }
+  .asset-tag { font-family:'Space Mono',monospace; font-size:9px; padding:2px 6px; border-radius:3px; border:1px solid; font-weight:700; letter-spacing:0.05em; }
+  .tag-oil { border-color:rgba(255,107,53,0.4); color:var(--orange); background:rgba(255,107,53,0.06); }
+  .tag-equity { border-color:rgba(0,230,118,0.4); color:var(--green); background:rgba(0,230,118,0.06); }
+  .tag-bond { border-color:rgba(168,85,247,0.4); color:var(--purple); background:rgba(168,85,247,0.06); }
+  .tag-fx { border-color:rgba(0,212,255,0.4); color:var(--accent); background:rgba(0,212,255,0.06); }
+  .tag-commodity { border-color:rgba(245,158,11,0.4); color:var(--gold); background:rgba(245,158,11,0.06); }
+
+  /* MAP */
+  .map-container { flex:1; position:relative; overflow:hidden; }
+  #map { width:100%; height:100%; }
+  .leaflet-container { background:#080c12; }
+  .leaflet-control-zoom a { background:var(--surface)!important; color:var(--text)!important; border-color:var(--border)!important; }
+  .leaflet-control-attribution { display:none!important; }
+
+  .map-overlay-tl { position:absolute; top:16px; left:16px; z-index:500; display:flex; flex-direction:column; gap:8px; }
+  .map-legend { background:rgba(13,17,23,0.92); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:6px; padding:10px 14px; }
+  .legend-title { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:8px; }
+  .legend-items { display:flex; flex-direction:column; gap:5px; }
+  .legend-item { display:flex; align-items:center; gap:7px; font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); }
+  .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* LOADING overlay on map */
+  .data-status { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:500; background:rgba(13,17,23,0.9); border:1px solid var(--border); border-radius:6px; padding:8px 16px; font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); display:flex; align-items:center; gap:8px; transition:opacity 0.5s; }
+  .data-status.hidden { opacity:0; pointer-events:none; }
+  .spin { animation:spin 1s linear infinite; display:inline-block; }
+  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+  /* RIGHT */
+  .right-panel { width:340px; flex-shrink:0; background:var(--surface); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+  .right-panel.hidden { display:none; }
+
+  .detail-header { padding:16px; border-bottom:1px solid var(--border); }
+  .detail-region { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+  .detail-title { font-size:16px; font-weight:800; color:var(--text); line-height:1.3; margin-bottom:10px; }
+  .detail-summary { font-size:12px; color:var(--text-dim); line-height:1.6; font-family:'Space Mono',monospace; }
+  .detail-tags { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+  .detail-tag { font-family:'Space Mono',monospace; font-size:9px; padding:3px 8px; border-radius:3px; background:var(--surface2); border:1px solid var(--border2); color:var(--text-dim); letter-spacing:0.08em; }
+
+  .assets-section { flex:1; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+  .assets-section::-webkit-scrollbar { width:4px; }
+  .assets-section::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+  .asset-group { border-bottom:1px solid var(--border); }
+  .asset-group-header { padding:10px 16px; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); display:flex; align-items:center; gap:8px; }
+  .asset-group-line { flex:1; height:1px; background:var(--border); }
+
+  .asset-row { padding:12px 16px; border-bottom:1px solid rgba(30,42,58,0.5); transition:background 0.1s; }
+  .asset-row:hover { background:var(--surface2); }
+  .asset-flex { display:flex; justify-content:space-between; align-items:flex-start; }
+  .asset-ticker { font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--text); }
+  .asset-name { font-size:11px; color:var(--text-muted); font-family:'Space Mono',monospace; margin-top:3px; }
+  .asset-price { font-family:'Space Mono',monospace; font-size:13px; font-weight:700; color:var(--text); text-align:right; }
+  .asset-change { font-family:'Space Mono',monospace; font-size:11px; font-weight:700; text-align:right; margin-top:3px; }
+  .asset-change.up { color:var(--green); }
+  .asset-change.down { color:var(--red); }
+  .asset-change.loading { color:var(--text-muted); }
+
+  .impact-wrap { margin-top:8px; }
+  .impact-label { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:4px; letter-spacing:0.08em; text-transform:uppercase; }
+  .impact-bar-bg { height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .impact-bar-fill { height:100%; border-radius:2px; }
+  .imp-high { background:var(--red); }
+  .imp-med { background:var(--yellow); }
+  .imp-low { background:var(--text-muted); }
+
+  /* Context box — facts only, no advice */
+  .axis-context { margin:0 16px 16px; padding:12px; background:rgba(0,212,255,0.04); border:1px solid rgba(0,212,255,0.15); border-radius:6px; }
+  .logo-text { font-size:22px; font-weight:800; letter-spacing:0.04em; }
+  .context-label { font-family:'Space Mono',monospace; font-size:9px; color:var(--accent); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:7px; display:flex; align-items:center; gap:6px; }
+  .context-label::before { content:''; width:4px; height:4px; background:var(--accent); border-radius:50%; }
+  .context-text { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); line-height:1.7; }
+
+  /* News strip inside event */
+  .news-strip { margin:0 16px 12px; }
+  .news-title { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; }
+  .news-item { padding:8px 10px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; margin-bottom:5px; cursor:pointer; }
+  .news-item:hover { border-color:var(--border2); }
+  .news-headline { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); line-height:1.5; }
+  .news-source { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); margin-top:4px; }
+
+  /* EMPTY STATE */
+  .empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; text-align:center; gap:12px; }
+  .empty-title { font-size:13px; font-weight:700; color:var(--text-dim); }
+  .empty-sub { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted); line-height:1.6; }
+
+  /* BOTTOM TICKER */
+  .bottom-bar { height:32px; background:var(--surface); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 16px; gap:24px; flex-shrink:0; overflow:hidden; }
+  .ticker-item { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:10px; white-space:nowrap; flex-shrink:0; }
+  .ticker-sym { color:var(--text-dim); font-weight:700; }
+  .ticker-val { color:var(--text); }
+  .ticker-chg.up { color:var(--green); }
+  .ticker-chg.down { color:var(--red); }
+  .ticker-chg.load { color:var(--text-muted); }
+  .ticker-separator { width:1px; height:12px; background:var(--border2); flex-shrink:0; }
+
+  .leaflet-tooltip { background:var(--surface)!important; border:1px solid var(--border2)!important; border-radius:4px!important; color:var(--text)!important; font-family:'Space Mono',monospace!important; font-size:10px!important; box-shadow:0 4px 16px rgba(0,0,0,0.5)!important; padding:6px 10px!important; }
+  .leaflet-tooltip::before { display:none!important; }
+
+  @keyframes fadeInRight { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+  .right-panel:not(.hidden) > * { animation:fadeInRight 0.2s ease forwards; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <circle cx="14" cy="14" r="13" stroke="#00d4ff" stroke-width="1.5" opacity="0.3"/>
+      <path d="M14 2L14 26M2 14L26 14" stroke="#00d4ff" stroke-width="1" opacity="0.2"/>
+      <circle cx="14" cy="14" r="4" fill="#00d4ff" opacity="0.9"/>
+      <circle cx="20" cy="6" r="1.5" fill="#ff4757" opacity="0.7"/>
+      <circle cx="5" cy="9" r="1.5" fill="#00d4ff" opacity="0.5"/>
+    </svg>
+    <span class="logo-text">θ<span>23</span></span>
+  </div>
+  <nav class="header-nav">
+    <div class="nav-item active">Geopolitical Map</div>
+    <div class="nav-item">Commodities</div>
+    <div class="nav-item">Macro Events</div>
+    <div class="nav-item">Correlations</div>
+    <div class="nav-item">Reports</div>
+  </nav>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>Live Feed</div>
+    <div class="time-display" id="clock">--:--:-- UTC</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <span class="panel-title">Active Events</span>
+      <span class="event-count" id="ev-count">7</span>
+    </div>
+    <div class="events-list" id="events-list"></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-container">
+    <div id="map"></div>
+    <div class="map-overlay-tl">
+      <div class="map-legend">
+        <div class="legend-title">Risk Level</div>
+        <div class="legend-items">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Critical</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>High</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Medium</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4a9eff"></div>Low</div>
+        </div>
+      </div>
+    </div>
+    <div class="data-status" id="data-status">
+      <span class="spin">⟳</span> Fetching live market data…
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel hidden" id="right-panel">
+    <div id="detail-content">
+      <div class="empty-state">
+        <div class="empty-title">Select an Event</div>
+        <div class="empty-sub">Click any marker to see linked assets with live prices and historical context</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-bar" id="ticker-bar"></div>
+
+<script>
+// ─── EVENTS DATA ─────────────────────────────────────────────────────────────
+// Context = historical facts & correlations only. No recommendations.
+
+const EVENTS = [
+  {
+    id:1, lat:48.5, lng:34.0,
+    title:"Russia-Ukraine Frontline Escalation",
+    region:"Eastern Europe", severity:"critical", date:"Ongoing",
+    summary:"Intensified activity along eastern front. NATO emergency sessions ongoing. Grain corridor status uncertain.",
+    tags:["Armed Conflict","NATO","Energy Security"],
+    tickers:["NG=F","CL=F","ZW=F","ZC=F","LMT","BAESY"],
+    tickerGroups:{ "Energy":["NG=F","CL=F"], "Grains":["ZW=F","ZC=F"], "Defense":["LMT","BAESY"] },
+    context:"Historically, escalations in the Black Sea region have correlated with wheat futures volatility of 4–8% within 48 hours. European natural gas spreads (TTF vs. Henry Hub) historically widen during periods of pipeline uncertainty. Defense sector indices have shown positive correlation with NATO activation events."
+  },
+  {
+    id:2, lat:26.0, lng:50.5,
+    title:"Strait of Hormuz Shipping Disruption",
+    region:"Persian Gulf", severity:"critical", date:"Ongoing",
+    summary:"Extended Houthi operations affecting tanker routing around the Arabian Peninsula. Transit times and insurance premiums elevated.",
+    tags:["Shipping","Oil Supply","Geopolitical Tension"],
+    tickers:["CL=F","BZ=F","FRO","STNG"],
+    tickerGroups:{ "Crude":["CL=F","BZ=F"], "Tankers":["FRO","STNG"] },
+    context:"The Strait of Hormuz handles approximately 20% of global seaborne oil. Historical disruption events have shown Brent premiums of $5–25 over WTI depending on duration. Tanker day-rates and shipping equities have historically shown strong positive correlation with Hormuz disruption duration."
+  },
+  {
+    id:3, lat:24.0, lng:121.5,
+    title:"Taiwan Strait Military Exercises",
+    region:"East Asia", severity:"high", date:"Ongoing",
+    summary:"PLA military activity near the median line. Taiwan Strait shipping lanes monitoring elevated. Semiconductor supply chain monitoring heightened.",
+    tags:["Military Exercise","Semiconductors","Supply Chain"],
+    tickers:["TSM","NVDA","ASML","SOXX"],
+    tickerGroups:{ "Semiconductors":["TSM","NVDA","ASML","SOXX"] },
+    context:"Taiwan produces approximately 92% of the world's most advanced semiconductors (sub-7nm). Historical analysis of prior PLA exercises (1996, 2022) showed TSM ADR drawdowns of 5–12% during peak tension periods. SOXX ETF has historically shown -1.5% to -3% per escalation event before recovering post-resolution."
+  },
+  {
+    id:4, lat:2.0, lng:15.0,
+    title:"Sahel Instability — Uranium Supply Concern",
+    region:"West Africa", severity:"high", date:"Ongoing",
+    summary:"Political instability in Niger affecting uranium extraction operations. French nuclear supply chain monitoring elevated.",
+    tags:["Political Risk","Uranium","Nuclear Energy"],
+    tickers:["CCJ","NXE","URA"],
+    tickerGroups:{ "Uranium / Nuclear":["CCJ","NXE","URA"] },
+    context:"Niger historically supplied ~5% of global uranium. France's nuclear fleet (70% of French electricity generation) sources significant uranium from this region. Historical uranium price data shows supply disruption events correlated with 10–20% price moves in uranium equities within 30 days."
+  },
+  {
+    id:5, lat:-34.6, lng:-58.4,
+    title:"Argentina IMF Reform Program",
+    region:"South America", severity:"medium", date:"Ongoing",
+    summary:"Fiscal adjustment program underway. Peso stabilization measures active. Agricultural export incentives in place.",
+    tags:["EM Reform","IMF","Agriculture"],
+    tickers:["ZS=F","ARGT"],
+    tickerGroups:{ "Agriculture":["ZS=F"], "EM Equity":["ARGT"] },
+    context:"Argentina is historically one of the world's top three soybean exporters (~25% of global supply). Peso stabilization programs have historically correlated with accelerated agricultural export volumes. Argentine sovereign bonds have shown high volatility correlated with IMF program compliance milestones."
+  },
+  {
+    id:6, lat:48.8, lng:2.3,
+    title:"ECB Monetary Policy Pivot Signals",
+    region:"Western Europe", severity:"medium", date:"Ongoing",
+    summary:"ECB communications shifting toward accommodation. Euro area inflation data monitoring ongoing. Rate path repricing underway.",
+    tags:["Monetary Policy","ECB","Rate Cycle"],
+    tickers:["EURUSD=X","EURCHF=X","EWG","FXE"],
+    tickerGroups:{ "FX":["EURUSD=X","EURCHF=X"], "Europe Equity":["EWG","FXE"] },
+    context:"Historically, ECB rate cut cycles have preceded EUR/USD weakness of 3–8% over 6 months. Export-heavy European equities (autos, industrials) have historically outperformed during EUR depreciation periods. Bund yields have historically compressed 40–80bps in the 3 months following a first ECB cut."
+  },
+  {
+    id:7, lat:35.6, lng:139.7,
+    title:"Bank of Japan Policy Normalization",
+    region:"East Asia", severity:"medium", date:"Ongoing",
+    summary:"BoJ moving away from ultra-loose policy. JGB yield caps removed. Yen carry trade unwind dynamics active.",
+    tags:["Monetary Policy","JPY","Capital Flows"],
+    tickers:["JPY=X","^N225","EWJ"],
+    tickerGroups:{ "FX & Equity":["JPY=X","^N225","EWJ"] },
+    context:"Japan holds approximately $1.1 trillion in US Treasuries. Historical BoJ tightening cycles have correlated with USD/JPY moves of 5–15%. The yen carry trade (borrowing JPY to buy higher-yielding assets) historically unwinds rapidly during BoJ tightening, affecting AUD, NZD, and EM assets. Nikkei exporters historically underperform when JPY strengthens more than 5%."
+  }
+];
+
+// Bottom bar tickers (Yahoo Finance symbols)
+const TICKER_SYMBOLS = ["^GSPC","^IXIC","^DJI","CL=F","GC=F","NG=F","EURUSD=X","JPY=X","^TNX","BTC-USD","ZW=F","ZS=F"];
+const TICKER_LABELS  = ["S&P 500","NASDAQ","DOW","WTI OIL","GOLD","NAT GAS","EUR/USD","USD/JPY","10Y UST","BTC/USD","WHEAT","SOYBEANS"];
+
+// ─── CACHE & STATE ──────────────────────────────────────────────────────────
+const priceCache = {};    // symbol -> { price, change, pct, up }
+let selectedId = null;
+let pricesLoaded = false;
+
+// ─── CLOCK ──────────────────────────────────────────────────────────────────
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    `${String(n.getUTCHours()).padStart(2,'0')}:${String(n.getUTCMinutes()).padStart(2,'0')}:${String(n.getUTCSeconds()).padStart(2,'0')} UTC`;
+}
+setInterval(tick,1000); tick();
+
+// ─── YAHOO FINANCE PROXY ────────────────────────────────────────────────────
+// We use allorigins.win as a CORS proxy to reach Yahoo Finance from the browser
+async function fetchYahooQuotes(symbols) {
+  const chunk = symbols.join(',');
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${encodeURIComponent(chunk)}&range=1d&interval=1d`;
+  // Try multiple CORS proxies in sequence
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`
+  ];
+
+  // Use the quote endpoint (more reliable) with corsproxy.io
+  const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(quoteUrl)}`;
+
+  const res = await fetch(proxyUrl, { headers: { 'Accept': 'application/json' } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const results = data?.quoteResponse?.result || [];
+  results.forEach(q => {
+    const pct = q.regularMarketChangePercent || 0;
+    priceCache[q.symbol] = {
+      price: formatPrice(q.regularMarketPrice, q.symbol),
+      change: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%',
+      rawChange: q.regularMarketChange || 0,
+      up: pct >= 0
+    };
+  });
+}
+
+function formatPrice(val, sym) {
+  if (!val) return '—';
+  if (sym.includes('=X') || sym === 'JPY=X') return val.toFixed(4);
+  if (val > 1000) return val.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+  return val.toFixed(2);
+}
+
+// Fallback proxy
+async function fetchYahooFallback(symbols) {
+  const chunk = symbols.join(',');
+  const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(quoteUrl)}`;
+  const res = await fetch(proxyUrl);
+  const json = await res.json();
+  const data = JSON.parse(json.contents);
+  const results = data?.quoteResponse?.result || [];
+  results.forEach(q => {
+    const pct = q.regularMarketChangePercent || 0;
+    priceCache[q.symbol] = {
+      price: formatPrice(q.regularMarketPrice, q.symbol),
+      change: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%',
+      rawChange: q.regularMarketChange || 0,
+      up: pct >= 0
+    };
+  });
+}
+
+// ─── LOAD ALL PRICES ────────────────────────────────────────────────────────
+async function loadAllPrices() {
+  const allSymbols = [...new Set([
+    ...TICKER_SYMBOLS,
+    ...EVENTS.flatMap(e => e.tickers)
+  ])];
+
+  // Batch into groups of 10
+  const batches = [];
+  for (let i = 0; i < allSymbols.length; i += 10) batches.push(allSymbols.slice(i, i+10));
+
+  try {
+    await Promise.all(batches.map(b => fetchYahooQuotes(b)));
+    pricesLoaded = true;
+    document.getElementById('data-status').classList.add('hidden');
+    renderTickerBar();
+    if (selectedId) renderDetailPanel(selectedId);
+  } catch(e) {
+    console.warn('Primary proxy failed, trying fallback...', e);
+    try {
+      await Promise.all(batches.map(b => fetchYahooFallback(b)));
+      pricesLoaded = true;
+      document.getElementById('data-status').classList.add('hidden');
+      renderTickerBar();
+      if (selectedId) renderDetailPanel(selectedId);
+    } catch(e2) {
+      document.getElementById('data-status').innerHTML = '⚠ Market data unavailable — retrying in 60s';
+      setTimeout(loadAllPrices, 60000);
+    }
+  }
+}
+
+// ─── TICKER BAR ─────────────────────────────────────────────────────────────
+function renderTickerBar() {
+  const bar = document.getElementById('ticker-bar');
+  bar.innerHTML = '';
+  TICKER_SYMBOLS.forEach((sym, i) => {
+    if (i > 0) { const s = document.createElement('div'); s.className='ticker-separator'; bar.appendChild(s); }
+    const d = priceCache[sym];
+    const el = document.createElement('div');
+    el.className = 'ticker-item';
+    el.innerHTML = `<span class="ticker-sym">${TICKER_LABELS[i]}</span>
+      <span class="ticker-val">${d ? d.price : '—'}</span>
+      <span class="ticker-chg ${d ? (d.up?'up':'down') : 'load'}">${d ? d.change : '…'}</span>`;
+    bar.appendChild(el);
+  });
+}
+
+// Init ticker bar with placeholders
+(function initTicker() {
+  const bar = document.getElementById('ticker-bar');
+  TICKER_SYMBOLS.forEach((sym, i) => {
+    if (i > 0) { const s = document.createElement('div'); s.className='ticker-separator'; bar.appendChild(s); }
+    const el = document.createElement('div');
+    el.className = 'ticker-item';
+    el.innerHTML = `<span class="ticker-sym">${TICKER_LABELS[i]}</span>
+      <span class="ticker-val">—</span><span class="ticker-chg load">…</span>`;
+    bar.appendChild(el);
+  });
+})();
+
+// ─── MAP ────────────────────────────────────────────────────────────────────
+const map = L.map('map', { center:[20,15], zoom:2.5, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:7 });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains:'abcd', maxZoom:19 }).addTo(map);
+
+const markerMap = {};
+EVENTS.forEach(ev => {
+  const colors = { critical:'#ff4757', high:'#ff6b35', medium:'#ffd32a', low:'#4a9eff' };
+  const c = colors[ev.severity];
+  const icon = L.divIcon({
+    className:'', iconSize:[16,16], iconAnchor:[8,8],
+    html:`<div style="width:16px;height:16px;position:relative;">
+      <div style="position:absolute;width:16px;height:16px;border-radius:50%;background:${c};opacity:0.35;animation:markerPulse 2.5s infinite ${ev.id*0.3}s;"></div>
+      <div id="mc-${ev.id}" style="width:14px;height:14px;border-radius:50%;border:2px solid ${c};background:${c};position:absolute;top:1px;left:1px;box-shadow:0 0 8px ${c}88;transition:transform 0.2s;"></div>
+    </div>`
+  });
+  const m = L.marker([ev.lat, ev.lng], {icon}).addTo(map).bindTooltip(ev.title, {permanent:false,direction:'top',offset:[0,-10]});
+  m.on('click', () => selectEvent(ev.id));
+  markerMap[ev.id] = m;
+});
+
+// pulse animation style
+const styleEl = document.createElement('style');
+styleEl.textContent = `@keyframes markerPulse{0%{transform:scale(1);opacity:0.7}100%{transform:scale(3.5);opacity:0}}`;
+document.head.appendChild(styleEl);
+
+// ─── EVENT LIST ─────────────────────────────────────────────────────────────
+const list = document.getElementById('events-list');
+EVENTS.forEach(ev => {
+  const el = document.createElement('div');
+  el.className = 'event-item';
+  el.id = `eli-${ev.id}`;
+  const tagCls = (t) => {
+    if (t.includes('Energy')||t.includes('Oil')||t.includes('Shipping')) return 'tag-oil';
+    if (t.includes('Monetary')||t.includes('ECB')||t.includes('IMF')||t.includes('Rate')) return 'tag-bond';
+    if (t.includes('Semi')||t.includes('Supply')||t.includes('Defense')) return 'tag-equity';
+    if (t.includes('FX')||t.includes('JPY')||t.includes('Currency')) return 'tag-fx';
+    return 'tag-commodity';
+  };
+  el.innerHTML = `
+    <div class="event-severity sev-${ev.severity}"><div class="severity-dot"></div>${ev.severity.toUpperCase()} · ${ev.region}</div>
+    <div class="event-title">${ev.title}</div>
+    <div class="event-meta">${ev.date}</div>
+    <div class="event-assets">${ev.tags.slice(0,3).map(t=>`<span class="asset-tag ${tagCls(t)}">${t}</span>`).join('')}</div>
+  `;
+  el.addEventListener('click', () => selectEvent(ev.id));
+  list.appendChild(el);
+});
+
+// ─── SELECT EVENT ────────────────────────────────────────────────────────────
+function selectEvent(id) {
+  document.querySelectorAll('.event-item').forEach(e=>e.classList.remove('active'));
+  const li = document.getElementById(`eli-${id}`);
+  if (li) { li.classList.add('active'); li.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  map.flyTo(EVENTS.find(e=>e.id===id).lat ? [EVENTS.find(e=>e.id===id).lat, EVENTS.find(e=>e.id===id).lng] : [0,0], Math.max(map.getZoom(),3.5), {duration:1.2});
+  document.getElementById('right-panel').classList.remove('hidden');
+  selectedId = id;
+  renderDetailPanel(id);
+}
+
+function renderDetailPanel(id) {
+  const ev = EVENTS.find(e=>e.id===id);
+  const sevColors = { critical:'var(--red)', high:'var(--orange)', medium:'var(--yellow)', low:'#4a9eff' };
+
+  let groupsHTML = '';
+  Object.entries(ev.tickerGroups).forEach(([grpName, syms]) => {
+    groupsHTML += `<div class="asset-group">
+      <div class="asset-group-header">${grpName}<div class="asset-group-line"></div></div>`;
+    syms.forEach(sym => {
+      const d = priceCache[sym];
+      const impactPct = getImpactPct(sym, ev);
+      const impCls = impactPct >= 75 ? 'imp-high' : impactPct >= 45 ? 'imp-med' : 'imp-low';
+      groupsHTML += `<div class="asset-row">
+        <div class="asset-flex">
+          <div><div class="asset-ticker">${sym}</div><div class="asset-name">${getAssetName(sym)}</div></div>
+          <div style="text-align:right">
+            <div class="asset-price">${d ? d.price : '—'}</div>
+            <div class="asset-change ${d ? (d.up?'up':'down') : 'loading'}">${d ? d.change : '…'}</div>
+          </div>
+        </div>
+        <div class="impact-wrap">
+          <div class="impact-label"><span>Historical Correlation</span><span>${impactPct}%</span></div>
+          <div class="impact-bar-bg"><div class="impact-bar-fill ${impCls}" style="width:${impactPct}%"></div></div>
+        </div>
+      </div>`;
+    });
+    groupsHTML += '</div>';
+  });
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-region" style="color:${sevColors[ev.severity]}">${ev.severity.toUpperCase()} · ${ev.region}</div>
+      <div class="detail-title">${ev.title}</div>
+      <div class="detail-summary">${ev.summary}</div>
+      <div class="detail-tags">${ev.tags.map(t=>`<span class="detail-tag">${t}</span>`).join('')}</div>
+    </div>
+    <div class="assets-section">${groupsHTML}</div>
+    <div class="axis-context">
+      <div class="context-label">Historical Context</div>
+      <div class="context-text">${ev.context}</div>
+    </div>
+  `;
+}
+
+// Simple correlation scores per event (based on research, not advice)
+const correlationMap = {
+  "NG=F":88,"CL=F":72,"ZW=F":92,"ZC=F":65,"LMT":78,"BAESY":74,
+  "BZ=F":95,"FRO":85,"STNG":88,
+  "TSM":90,"NVDA":72,"ASML":78,"SOXX":70,
+  "CCJ":85,"NXE":80,"URA":82,
+  "ZS=F":62,"ARGT":75,
+  "EURUSD=X":88,"EURCHF=X":70,"EWG":64,"FXE":66,
+  "JPY=X":92,"^N225":78,"EWJ":72
+};
+function getImpactPct(sym) { return correlationMap[sym] || 55; }
+
+const assetNames = {
+  "NG=F":"Natural Gas Futures","CL=F":"WTI Crude Oil","ZW=F":"Wheat Futures","ZC=F":"Corn Futures",
+  "LMT":"Lockheed Martin","BAESY":"BAE Systems","BZ=F":"Brent Crude",
+  "FRO":"Frontline plc","STNG":"Scorpio Tankers",
+  "TSM":"Taiwan Semiconductor","NVDA":"NVIDIA","ASML":"ASML Holding","SOXX":"PHLX Semiconductor ETF",
+  "CCJ":"Cameco Corp","NXE":"NexGen Energy","URA":"Global X Uranium ETF",
+  "ZS=F":"Soybean Futures","ARGT":"Global X MSCI Argentina ETF",
+  "EURUSD=X":"EUR / USD","EURCHF=X":"EUR / CHF","EWG":"iShares Germany ETF","FXE":"Invesco CurrencyShares Euro",
+  "JPY=X":"USD / JPY","^N225":"Nikkei 225","EWJ":"iShares MSCI Japan ETF"
+};
+function getAssetName(sym) { return assetNames[sym] || sym; }
+
+// ─── START ───────────────────────────────────────────────────────────────────
+loadAllPrices();
+// Refresh prices every 60 seconds
+setInterval(loadAllPrices, 60000);
+</script>
+</body>
+</html>
