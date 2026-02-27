@@ -158,14 +158,17 @@
   .empty-sub { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted); line-height:1.6; }
 
   /* BOTTOM TICKER */
-  .bottom-bar { height:32px; background:var(--surface); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 16px; gap:24px; flex-shrink:0; overflow:hidden; }
-  .ticker-item { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:10px; white-space:nowrap; flex-shrink:0; }
+  .bottom-bar { height:32px; background:var(--surface); border-top:1px solid var(--border); flex-shrink:0; overflow:hidden; display:flex; align-items:center; }
+  .ticker-track { display:flex; align-items:center; animation:tickerScroll 80s linear infinite; }
+  .ticker-track:hover { animation-play-state:paused; }
+  @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  .ticker-item { display:inline-flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:10px; white-space:nowrap; padding:0 20px; flex-shrink:0; }
   .ticker-sym { color:var(--text-dim); font-weight:700; }
   .ticker-val { color:var(--text); }
   .ticker-chg.up { color:var(--green); }
   .ticker-chg.down { color:var(--red); }
   .ticker-chg.load { color:var(--text-muted); }
-  .ticker-separator { width:1px; height:12px; background:var(--border2); flex-shrink:0; }
+  .ticker-separator { width:1px; height:14px; background:var(--border2); flex-shrink:0; }
 
   .leaflet-tooltip { background:var(--surface)!important; border:1px solid var(--border2)!important; border-radius:4px!important; color:var(--text)!important; font-family:'Space Mono',monospace!important; font-size:10px!important; box-shadow:0 4px 16px rgba(0,0,0,0.5)!important; padding:6px 10px!important; }
   .leaflet-tooltip::before { display:none!important; }
@@ -242,7 +245,7 @@
 
 </div>
 
-<div class="bottom-bar" id="ticker-bar"></div>
+<div class="bottom-bar"><div class="ticker-track" id="ticker-bar"></div></div>
 
 <script>
 // ─── EVENTS DATA ─────────────────────────────────────────────────────────────
@@ -398,35 +401,46 @@ async function fetchSnapshot(displayKey) {
   if (!info) return;
   const { poly, type } = info;
 
-  let url;
-  if (type === 'forex')  url = `${BASE}/v2/snapshot/locale/global/markets/forex/tickers/${poly}?apiKey=${POLYGON_KEY}`;
-  else if (type === 'crypto') url = `${BASE}/v2/snapshot/locale/global/markets/crypto/tickers/${poly}?apiKey=${POLYGON_KEY}`;
-  else if (type === 'index')  url = `${BASE}/v3/snapshot?ticker.any_of=${poly}&apiKey=${POLYGON_KEY}`;
-  else url = `${BASE}/v2/snapshot/locale/us/markets/stocks/tickers/${poly}?apiKey=${POLYGON_KEY}`;
-
   try {
-    const res = await fetch(url);
-    const d = await res.json();
     let price, pct;
 
-    if (type === 'forex') {
-      const t = d?.ticker;
-      price = t?.day?.c || t?.lastQuote?.a;
-      const prev = t?.prevDay?.c;
-      pct = prev && price ? ((price - prev) / prev) * 100 : 0;
-    } else if (type === 'crypto') {
-      const t = d?.ticker;
-      price = t?.day?.c || t?.lastTrade?.p;
-      pct = t?.todaysChangePerc || 0;
-    } else if (type === 'index') {
+    if (type === 'index') {
+      // Indices: use /v3/snapshot with ticker filter
+      const res = await fetch(`${BASE}/v3/snapshot?ticker.any_of=${poly}&apiKey=${POLYGON_KEY}`);
+      const d = await res.json();
       const t = d?.results?.[0];
-      price = t?.value || t?.session?.close;
-      const prev = t?.session?.previous_close;
-      pct = prev && price ? ((price - prev) / prev) * 100 : (t?.todaysChangePerc || 0);
-    } else {
+      if (!t) return;
+      price = t.value ?? t.session?.close;
+      const prev = t.session?.previous_close;
+      pct = prev && price ? ((price - prev) / prev) * 100 : 0;
+
+    } else if (type === 'forex') {
+      // Forex: C:EURUSD format
+      const res = await fetch(`${BASE}/v2/snapshot/locale/global/markets/forex/tickers/${poly}?apiKey=${POLYGON_KEY}`);
+      const d = await res.json();
       const t = d?.ticker;
-      price = t?.day?.c || t?.lastTrade?.p;
-      pct = t?.todaysChangePerc || 0;
+      if (!t) return;
+      price = t.day?.c ?? t.lastQuote?.a;
+      const prev = t.prevDay?.c;
+      pct = prev && price ? ((price - prev) / prev) * 100 : 0;
+
+    } else if (type === 'crypto') {
+      // Crypto: X:BTCUSD format
+      const res = await fetch(`${BASE}/v2/snapshot/locale/global/markets/crypto/tickers/${poly}?apiKey=${POLYGON_KEY}`);
+      const d = await res.json();
+      const t = d?.ticker;
+      if (!t) return;
+      price = t.day?.c ?? t.lastTrade?.p;
+      pct = t.todaysChangePerc ?? 0;
+
+    } else {
+      // Stocks & ETFs
+      const res = await fetch(`${BASE}/v2/snapshot/locale/us/markets/stocks/tickers/${poly}?apiKey=${POLYGON_KEY}`);
+      const d = await res.json();
+      const t = d?.ticker;
+      if (!t) return;
+      price = t.day?.c ?? t.lastTrade?.p;
+      pct = t.todaysChangePerc ?? 0;
     }
 
     if (!price) return;
@@ -436,7 +450,7 @@ async function fetchSnapshot(displayKey) {
       up: pct >= 0
     };
   } catch(e) {
-    console.warn('Polygon fetch failed:', displayKey, e);
+    console.warn('Polygon fetch failed:', displayKey, e.message);
   }
 }
 
@@ -461,33 +475,34 @@ async function loadAllPrices() {
   if (selectedId) renderDetailPanel(selectedId);
 }
 
-// ─── TICKER BAR ─────────────────────────────────────────────────────────────
-function renderTickerBar() {
-  const bar = document.getElementById('ticker-bar');
-  bar.innerHTML = '';
-  TICKER_SYMBOLS.forEach((sym, i) => {
-    if (i > 0) { const s = document.createElement('div'); s.className='ticker-separator'; bar.appendChild(s); }
+// ─── TICKER BAR ──────────────────────────────────────────────────────────────
+function buildTickerItems() {
+  return TICKER_SYMBOLS.map((sym, i) => {
     const d = priceCache[sym];
-    const el = document.createElement('div');
-    el.className = 'ticker-item';
-    el.innerHTML = `<span class="ticker-sym">${TICKER_LABELS[i]}</span>
+    const sep = `<div class="ticker-separator"></div>`;
+    return `${i > 0 ? sep : ''}<div class="ticker-item">
+      <span class="ticker-sym">${TICKER_LABELS[i]}</span>
       <span class="ticker-val">${d ? d.price : '—'}</span>
-      <span class="ticker-chg ${d ? (d.up?'up':'down') : 'load'}">${d ? d.change : '…'}</span>`;
-    bar.appendChild(el);
-  });
+      <span class="ticker-chg ${d ? (d.up?'up':'down') : 'load'}">${d ? d.change : '…'}</span>
+    </div>`;
+  }).join('');
 }
 
-// Init ticker bar with placeholders
+function renderTickerBar() {
+  const bar = document.getElementById('ticker-bar');
+  const html = buildTickerItems();
+  // Duplicate for seamless infinite scroll
+  bar.innerHTML = html + '<div class="ticker-separator"></div>' + html;
+}
+
+// Init ticker with placeholders
 (function initTicker() {
   const bar = document.getElementById('ticker-bar');
-  TICKER_SYMBOLS.forEach((sym, i) => {
-    if (i > 0) { const s = document.createElement('div'); s.className='ticker-separator'; bar.appendChild(s); }
-    const el = document.createElement('div');
-    el.className = 'ticker-item';
-    el.innerHTML = `<span class="ticker-sym">${TICKER_LABELS[i]}</span>
-      <span class="ticker-val">—</span><span class="ticker-chg load">…</span>`;
-    bar.appendChild(el);
-  });
+  const html = TICKER_SYMBOLS.map((sym, i) => {
+    const sep = i > 0 ? '<div class="ticker-separator"></div>' : '';
+    return `${sep}<div class="ticker-item"><span class="ticker-sym">${TICKER_LABELS[i]}</span><span class="ticker-val">—</span><span class="ticker-chg load">…</span></div>`;
+  }).join('');
+  bar.innerHTML = html + '<div class="ticker-separator"></div>' + html;
 })();
 
 // ─── MAP ────────────────────────────────────────────────────────────────────
