@@ -325,12 +325,55 @@ const EVENTS = [
 const TICKER_SYMBOLS = ["^GSPC","^IXIC","^DJI","CL=F","GC=F","NG=F","EURUSD=X","JPY=X","^TNX","BTC-USD","ZW=F","ZS=F"];
 const TICKER_LABELS  = ["S&P 500","NASDAQ","DOW","WTI OIL","GOLD","NAT GAS","EUR/USD","USD/JPY","10Y UST","BTC/USD","WHEAT","SOYBEANS"];
 
-// ─── CACHE & STATE ──────────────────────────────────────────────────────────
-const priceCache = {};    // symbol -> { price, change, pct, up }
+// ─── FINNHUB CONFIG ──────────────────────────────────────────────────────────
+// Replace with your Finnhub API key from finnhub.io
+const FINNHUB_KEY = 'd6h1h81r01qnjncn0ip0d6h1h81r01qnjncn0ipg';
+
+// Map our display symbols to Finnhub symbols
+// Stocks → direct symbol | Forex → OANDA:EUR_USD | Crypto → BINANCE:BTCUSDT
+// Futures → ETF proxies (free tier)
+const FINNHUB_MAP = {
+  // Bottom ticker
+  "^GSPC":   { fh: "SPY",              label: "S&P 500",    isEtf: true  },
+  "^IXIC":   { fh: "QQQ",              label: "NASDAQ",     isEtf: true  },
+  "^DJI":    { fh: "DIA",              label: "DOW",        isEtf: true  },
+  "CL=F":    { fh: "USO",              label: "WTI OIL",    isEtf: true  },
+  "GC=F":    { fh: "GLD",              label: "GOLD",       isEtf: true  },
+  "NG=F":    { fh: "UNG",              label: "NAT GAS",    isEtf: true  },
+  "EURUSD=X":{ fh: "OANDA:EUR_USD",    label: "EUR/USD",    isFx: true   },
+  "JPY=X":   { fh: "OANDA:USD_JPY",    label: "USD/JPY",    isFx: true   },
+  "^TNX":    { fh: "IEF",              label: "10Y UST",    isEtf: true  },
+  "BTC-USD": { fh: "BINANCE:BTCUSDT",  label: "BTC/USD",    isCrypto: true },
+  "ZW=F":    { fh: "WEAT",             label: "WHEAT",      isEtf: true  },
+  "ZS=F":    { fh: "SOYB",             label: "SOYBEANS",   isEtf: true  },
+  // Event assets
+  "ZC=F":    { fh: "CORN",             label: "Corn ETF",   isEtf: true  },
+  "LMT":     { fh: "LMT",              label: "Lockheed Martin"           },
+  "BAESY":   { fh: "BAESY",            label: "BAE Systems"               },
+  "BZ=F":    { fh: "BNO",              label: "Brent ETF",  isEtf: true  },
+  "FRO":     { fh: "FRO",              label: "Frontline"                 },
+  "STNG":    { fh: "STNG",             label: "Scorpio Tankers"           },
+  "TSM":     { fh: "TSM",              label: "Taiwan Semi"               },
+  "NVDA":    { fh: "NVDA",             label: "NVIDIA"                    },
+  "ASML":    { fh: "ASML",             label: "ASML Holding"              },
+  "SOXX":    { fh: "SOXX",             label: "Semi ETF"                  },
+  "CCJ":     { fh: "CCJ",              label: "Cameco"                    },
+  "NXE":     { fh: "NXE",              label: "NexGen Energy"             },
+  "URA":     { fh: "URA",              label: "Uranium ETF"               },
+  "ARGT":    { fh: "ARGT",             label: "Argentina ETF"             },
+  "EURCHF=X":{ fh: "OANDA:EUR_CHF",    label: "EUR/CHF",    isFx: true   },
+  "EWG":     { fh: "EWG",              label: "Germany ETF"               },
+  "FXE":     { fh: "FXE",              label: "Euro ETF"                  },
+  "^N225":   { fh: "EWJ",              label: "Japan ETF",  isEtf: true  },
+  "EWJ":     { fh: "EWJ",              label: "Japan ETF"                 },
+};
+
+// ─── CACHE & STATE ───────────────────────────────────────────────────────────
+const priceCache = {};
 let selectedId = null;
 let pricesLoaded = false;
 
-// ─── CLOCK ──────────────────────────────────────────────────────────────────
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
 function tick() {
   const n = new Date();
   document.getElementById('clock').textContent =
@@ -338,94 +381,77 @@ function tick() {
 }
 setInterval(tick,1000); tick();
 
-// ─── YAHOO FINANCE PROXY ────────────────────────────────────────────────────
-// We use allorigins.win as a CORS proxy to reach Yahoo Finance from the browser
-async function fetchYahooQuotes(symbols) {
-  const chunk = symbols.join(',');
-  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${encodeURIComponent(chunk)}&range=1d&interval=1d`;
-  // Try multiple CORS proxies in sequence
-  const proxies = [
-    `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`
-  ];
+// ─── FINNHUB FETCH ───────────────────────────────────────────────────────────
+async function fetchFinnhubQuote(displaySym) {
+  const info = FINNHUB_MAP[displaySym];
+  if (!info) return;
+  const fhSym = info.fh;
 
-  // Use the quote endpoint (more reliable) with corsproxy.io
-  const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(quoteUrl)}`;
+  let url;
+  if (info.isFx) {
+    // Forex: use OANDA format, strip the colon for the API call
+    url = `https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FINNHUB_KEY}`;
+  } else if (info.isCrypto) {
+    url = `https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FINNHUB_KEY}`;
+  } else {
+    url = `https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FINNHUB_KEY}`;
+  }
 
-  const res = await fetch(proxyUrl, { headers: { 'Accept': 'application/json' } });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  const results = data?.quoteResponse?.result || [];
-  results.forEach(q => {
-    const pct = q.regularMarketChangePercent || 0;
-    priceCache[q.symbol] = {
-      price: formatPrice(q.regularMarketPrice, q.symbol),
+  try {
+    const res = await fetch(url);
+    const d = await res.json();
+    if (!d || !d.c) return;
+    const price = d.c;
+    const prevClose = d.pc;
+    const change = price - prevClose;
+    const pct = prevClose ? (change / prevClose) * 100 : 0;
+    priceCache[displaySym] = {
+      price: formatPrice(price, displaySym, info),
       change: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%',
-      rawChange: q.regularMarketChange || 0,
       up: pct >= 0
     };
-  });
+  } catch(e) {
+    console.warn('Finnhub fetch failed for', displaySym, e);
+  }
 }
 
-function formatPrice(val, sym) {
+function formatPrice(val, sym, info) {
   if (!val) return '—';
-  if (sym.includes('=X') || sym === 'JPY=X') return val.toFixed(4);
-  if (val > 1000) return val.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
+  if (info && info.isFx) return val.toFixed(4);
+  if (info && info.isCrypto) return val.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+  if (val > 10000) return val.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+  if (val > 100) return val.toFixed(2);
   return val.toFixed(2);
 }
 
-// Fallback proxy
-async function fetchYahooFallback(symbols) {
-  const chunk = symbols.join(',');
-  const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(quoteUrl)}`;
-  const res = await fetch(proxyUrl);
-  const json = await res.json();
-  const data = JSON.parse(json.contents);
-  const results = data?.quoteResponse?.result || [];
-  results.forEach(q => {
-    const pct = q.regularMarketChangePercent || 0;
-    priceCache[q.symbol] = {
-      price: formatPrice(q.regularMarketPrice, q.symbol),
-      change: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%',
-      rawChange: q.regularMarketChange || 0,
-      up: pct >= 0
-    };
-  });
-}
-
-// ─── LOAD ALL PRICES ────────────────────────────────────────────────────────
+// ─── LOAD ALL PRICES ─────────────────────────────────────────────────────────
 async function loadAllPrices() {
+  if (FINNHUB_KEY === 'YOUR_API_KEY_HERE') {
+    document.getElementById('data-status').innerHTML = '⚠ Add your Finnhub API key to activate live data';
+    return;
+  }
+
   const allSymbols = [...new Set([
     ...TICKER_SYMBOLS,
     ...EVENTS.flatMap(e => e.tickers)
   ])];
 
-  // Batch into groups of 10
-  const batches = [];
-  for (let i = 0; i < allSymbols.length; i += 10) batches.push(allSymbols.slice(i, i+10));
+  document.getElementById('data-status').innerHTML = '<span class="spin">⟳</span> Fetching live market data…';
 
-  try {
-    await Promise.all(batches.map(b => fetchYahooQuotes(b)));
-    pricesLoaded = true;
-    document.getElementById('data-status').classList.add('hidden');
-    renderTickerBar();
-    if (selectedId) renderDetailPanel(selectedId);
-  } catch(e) {
-    console.warn('Primary proxy failed, trying fallback...', e);
-    try {
-      await Promise.all(batches.map(b => fetchYahooFallback(b)));
-      pricesLoaded = true;
-      document.getElementById('data-status').classList.add('hidden');
-      renderTickerBar();
-      if (selectedId) renderDetailPanel(selectedId);
-    } catch(e2) {
-      document.getElementById('data-status').innerHTML = '⚠ Market data unavailable — retrying in 60s';
-      setTimeout(loadAllPrices, 60000);
-    }
+  // Fetch all in parallel — Finnhub handles it
+  // Stagger slightly to respect rate limit (60 calls/min free tier)
+  const delay = (ms) => new Promise(r => setTimeout(r, ms));
+  for (let i = 0; i < allSymbols.length; i++) {
+    fetchFinnhubQuote(allSymbols[i]);
+    if (i % 10 === 9) await delay(1000); // brief pause every 10 calls
   }
+
+  // Wait a bit then render
+  await delay(3000);
+  pricesLoaded = true;
+  document.getElementById('data-status').classList.add('hidden');
+  renderTickerBar();
+  if (selectedId) renderDetailPanel(selectedId);
 }
 
 // ─── TICKER BAR ─────────────────────────────────────────────────────────────
