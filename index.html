@@ -255,8 +255,8 @@ const EVENTS = [
     region:"Eastern Europe", severity:"critical", date:"Ongoing",
     summary:"Intensified activity along eastern front. NATO emergency sessions ongoing. Grain corridor status uncertain.",
     tags:["Armed Conflict","NATO","Energy Security"],
-    tickers:["NG=F","CL=F","ZW=F","ZC=F","LMT","BAESY"],
-    tickerGroups:{ "Energy":["NG=F","CL=F"], "Grains":["ZW=F","ZC=F"], "Defense":["LMT","BAESY"] },
+    tickers:["UNG","USO","WEAT","CORN","LMT","BAESY"],
+    tickerGroups:{ "Energy":["UNG","USO"], "Grains":["WEAT","CORN"], "Defense":["LMT","BAESY"] },
     context:"Historically, escalations in the Black Sea region have correlated with wheat futures volatility of 4–8% within 48 hours. European natural gas spreads (TTF vs. Henry Hub) historically widen during periods of pipeline uncertainty. Defense sector indices have shown positive correlation with NATO activation events."
   },
   {
@@ -265,8 +265,8 @@ const EVENTS = [
     region:"Persian Gulf", severity:"critical", date:"Ongoing",
     summary:"Extended Houthi operations affecting tanker routing around the Arabian Peninsula. Transit times and insurance premiums elevated.",
     tags:["Shipping","Oil Supply","Geopolitical Tension"],
-    tickers:["CL=F","BZ=F","FRO","STNG"],
-    tickerGroups:{ "Crude":["CL=F","BZ=F"], "Tankers":["FRO","STNG"] },
+    tickers:["USO","BNO","FRO","STNG"],
+    tickerGroups:{ "Crude":["USO","BNO"], "Tankers":["FRO","STNG"] },
     context:"The Strait of Hormuz handles approximately 20% of global seaborne oil. Historical disruption events have shown Brent premiums of $5–25 over WTI depending on duration. Tanker day-rates and shipping equities have historically shown strong positive correlation with Hormuz disruption duration."
   },
   {
@@ -295,8 +295,8 @@ const EVENTS = [
     region:"South America", severity:"medium", date:"Ongoing",
     summary:"Fiscal adjustment program underway. Peso stabilization measures active. Agricultural export incentives in place.",
     tags:["EM Reform","IMF","Agriculture"],
-    tickers:["ZS=F","ARGT"],
-    tickerGroups:{ "Agriculture":["ZS=F"], "EM Equity":["ARGT"] },
+    tickers:["SOYB","ARGT"],
+    tickerGroups:{ "Agriculture":["SOYB"], "EM Equity":["ARGT"] },
     context:"Argentina is historically one of the world's top three soybean exporters (~25% of global supply). Peso stabilization programs have historically correlated with accelerated agricultural export volumes. Argentine sovereign bonds have shown high volatility correlated with IMF program compliance milestones."
   },
   {
@@ -305,8 +305,8 @@ const EVENTS = [
     region:"Western Europe", severity:"medium", date:"Ongoing",
     summary:"ECB communications shifting toward accommodation. Euro area inflation data monitoring ongoing. Rate path repricing underway.",
     tags:["Monetary Policy","ECB","Rate Cycle"],
-    tickers:["EURUSD=X","EURCHF=X","EWG","FXE"],
-    tickerGroups:{ "FX":["EURUSD=X","EURCHF=X"], "Europe Equity":["EWG","FXE"] },
+    tickers:["EURUSD","EURCHF","EWG","FXE"],
+    tickerGroups:{ "FX":["EURUSD","EURCHF"], "Europe Equity":["EWG","FXE"] },
     context:"Historically, ECB rate cut cycles have preceded EUR/USD weakness of 3–8% over 6 months. Export-heavy European equities (autos, industrials) have historically outperformed during EUR depreciation periods. Bund yields have historically compressed 40–80bps in the 3 months following a first ECB cut."
   },
   {
@@ -315,58 +315,60 @@ const EVENTS = [
     region:"East Asia", severity:"medium", date:"Ongoing",
     summary:"BoJ moving away from ultra-loose policy. JGB yield caps removed. Yen carry trade unwind dynamics active.",
     tags:["Monetary Policy","JPY","Capital Flows"],
-    tickers:["JPY=X","^N225","EWJ"],
-    tickerGroups:{ "FX & Equity":["JPY=X","^N225","EWJ"] },
+    tickers:["USDJPY","NDX","EWJ"],
+    tickerGroups:{ "FX & Equity":["USDJPY","NDX","EWJ"] },
     context:"Japan holds approximately $1.1 trillion in US Treasuries. Historical BoJ tightening cycles have correlated with USD/JPY moves of 5–15%. The yen carry trade (borrowing JPY to buy higher-yielding assets) historically unwinds rapidly during BoJ tightening, affecting AUD, NZD, and EM assets. Nikkei exporters historically underperform when JPY strengthens more than 5%."
   }
 ];
 
 // Bottom bar tickers (Yahoo Finance symbols)
-const TICKER_SYMBOLS = ["^GSPC","^IXIC","^DJI","CL=F","GC=F","NG=F","EURUSD=X","JPY=X","^TNX","BTC-USD","ZW=F","ZS=F"];
+const TICKER_SYMBOLS = ["SPX","NDX","DJI","USO","GLD","UNG","EURUSD","USDJPY","IEF","BTCUSD","WEAT","SOYB"];
 const TICKER_LABELS  = ["S&P 500","NASDAQ","DOW","WTI OIL","GOLD","NAT GAS","EUR/USD","USD/JPY","10Y UST","BTC/USD","WHEAT","SOYBEANS"];
 
-// ─── FINNHUB CONFIG ──────────────────────────────────────────────────────────
-// Replace with your Finnhub API key from finnhub.io
-const FINNHUB_KEY = 'd6h1h81r01qnjncn0ip0d6h1h81r01qnjncn0ipg';
+// ─── POLYGON (MASSIVE) CONFIG ────────────────────────────────────────────────
+const POLYGON_KEY = '_R1qT8Epcg0ZZqwgLQ2R4GwxjDUMekbw';
+const BASE = 'https://api.polygon.io';
 
-// Map our display symbols to Finnhub symbols
-// Stocks → direct symbol | Forex → OANDA:EUR_USD | Crypto → BINANCE:BTCUSDT
-// Futures → ETF proxies (free tier)
-const FINNHUB_MAP = {
-  // Bottom ticker
-  "^GSPC":   { fh: "SPY",              label: "S&P 500",    isEtf: true  },
-  "^IXIC":   { fh: "QQQ",              label: "NASDAQ",     isEtf: true  },
-  "^DJI":    { fh: "DIA",              label: "DOW",        isEtf: true  },
-  "CL=F":    { fh: "USO",              label: "WTI OIL",    isEtf: true  },
-  "GC=F":    { fh: "GLD",              label: "GOLD",       isEtf: true  },
-  "NG=F":    { fh: "UNG",              label: "NAT GAS",    isEtf: true  },
-  "EURUSD=X":{ fh: "OANDA:EUR_USD",    label: "EUR/USD",    isFx: true   },
-  "JPY=X":   { fh: "OANDA:USD_JPY",    label: "USD/JPY",    isFx: true   },
-  "^TNX":    { fh: "IEF",              label: "10Y UST",    isEtf: true  },
-  "BTC-USD": { fh: "BINANCE:BTCUSDT",  label: "BTC/USD",    isCrypto: true },
-  "ZW=F":    { fh: "WEAT",             label: "WHEAT",      isEtf: true  },
-  "ZS=F":    { fh: "SOYB",             label: "SOYBEANS",   isEtf: true  },
-  // Event assets
-  "ZC=F":    { fh: "CORN",             label: "Corn ETF",   isEtf: true  },
-  "LMT":     { fh: "LMT",              label: "Lockheed Martin"           },
-  "BAESY":   { fh: "BAESY",            label: "BAE Systems"               },
-  "BZ=F":    { fh: "BNO",              label: "Brent ETF",  isEtf: true  },
-  "FRO":     { fh: "FRO",              label: "Frontline"                 },
-  "STNG":    { fh: "STNG",             label: "Scorpio Tankers"           },
-  "TSM":     { fh: "TSM",              label: "Taiwan Semi"               },
-  "NVDA":    { fh: "NVDA",             label: "NVIDIA"                    },
-  "ASML":    { fh: "ASML",             label: "ASML Holding"              },
-  "SOXX":    { fh: "SOXX",             label: "Semi ETF"                  },
-  "CCJ":     { fh: "CCJ",              label: "Cameco"                    },
-  "NXE":     { fh: "NXE",              label: "NexGen Energy"             },
-  "URA":     { fh: "URA",              label: "Uranium ETF"               },
-  "ARGT":    { fh: "ARGT",             label: "Argentina ETF"             },
-  "EURCHF=X":{ fh: "OANDA:EUR_CHF",    label: "EUR/CHF",    isFx: true   },
-  "EWG":     { fh: "EWG",              label: "Germany ETF"               },
-  "FXE":     { fh: "FXE",              label: "Euro ETF"                  },
-  "^N225":   { fh: "EWJ",              label: "Japan ETF",  isEtf: true  },
-  "EWJ":     { fh: "EWJ",              label: "Japan ETF"                 },
+// Symbol map: displayKey → { poly, label, type }
+// types: stock | index | forex | crypto | etf
+const SYMBOL_MAP = {
+  // ── Ticker bar ──────────────────────────────────────────────────
+  "SPX":       { poly:"I:SPX",      label:"S&P 500",   type:"index"  },
+  "NDX":       { poly:"I:NDX",      label:"NASDAQ",    type:"index"  },
+  "DJI":       { poly:"I:DJI",      label:"DOW",       type:"index"  },
+  "USO":       { poly:"USO",        label:"WTI OIL",   type:"etf"    },
+  "GLD":       { poly:"GLD",        label:"GOLD",      type:"etf"    },
+  "UNG":       { poly:"UNG",        label:"NAT GAS",   type:"etf"    },
+  "EURUSD":    { poly:"C:EURUSD",   label:"EUR/USD",   type:"forex"  },
+  "USDJPY":    { poly:"C:USDJPY",   label:"USD/JPY",   type:"forex"  },
+  "IEF":       { poly:"IEF",        label:"10Y UST",   type:"etf"    },
+  "BTCUSD":    { poly:"X:BTCUSD",   label:"BTC/USD",   type:"crypto" },
+  "WEAT":      { poly:"WEAT",       label:"WHEAT",     type:"etf"    },
+  "SOYB":      { poly:"SOYB",       label:"SOYBEANS",  type:"etf"    },
+  // ── Event assets ────────────────────────────────────────────────
+  "LMT":       { poly:"LMT",        label:"Lockheed Martin",    type:"stock" },
+  "BAESY":     { poly:"BAESY",      label:"BAE Systems",        type:"stock" },
+  "BNO":       { poly:"BNO",        label:"Brent Oil ETF",      type:"etf"   },
+  "FRO":       { poly:"FRO",        label:"Frontline",          type:"stock" },
+  "STNG":      { poly:"STNG",       label:"Scorpio Tankers",    type:"stock" },
+  "TSM":       { poly:"TSM",        label:"Taiwan Semiconductor",type:"stock"},
+  "NVDA":      { poly:"NVDA",       label:"NVIDIA",             type:"stock" },
+  "ASML":      { poly:"ASML",       label:"ASML Holding",       type:"stock" },
+  "SOXX":      { poly:"SOXX",       label:"PHLX Semi ETF",      type:"etf"   },
+  "CCJ":       { poly:"CCJ",        label:"Cameco Corp",        type:"stock" },
+  "NXE":       { poly:"NXE",        label:"NexGen Energy",      type:"stock" },
+  "URA":       { poly:"URA",        label:"Uranium ETF",        type:"etf"   },
+  "CORN":      { poly:"CORN",       label:"Corn ETF",           type:"etf"   },
+  "ARGT":      { poly:"ARGT",       label:"Argentina ETF",      type:"etf"   },
+  "EURCHF":    { poly:"C:EURCHF",   label:"EUR/CHF",            type:"forex" },
+  "EWG":       { poly:"EWG",        label:"Germany ETF",        type:"etf"   },
+  "FXE":       { poly:"FXE",        label:"Euro ETF",           type:"etf"   },
+  "EWJ":       { poly:"EWJ",        label:"Japan ETF",          type:"etf"   },
+  "RTX":       { poly:"RTX",        label:"Raytheon",           type:"stock" },
 };
+
+// Update EVENTS tickers to use new keys
+// (we'll map these in getAssetName / tickerGroups)
 
 // ─── CACHE & STATE ───────────────────────────────────────────────────────────
 const priceCache = {};
@@ -381,73 +383,78 @@ function tick() {
 }
 setInterval(tick,1000); tick();
 
-// ─── FINNHUB FETCH ───────────────────────────────────────────────────────────
-async function fetchFinnhubQuote(displaySym) {
-  const info = FINNHUB_MAP[displaySym];
+// ─── POLYGON FETCH ───────────────────────────────────────────────────────────
+function formatPrice(val, type) {
+  if (!val && val !== 0) return '—';
+  if (type === 'forex') return val.toFixed(4);
+  if (type === 'crypto') return val.toLocaleString('en-US', {maximumFractionDigits:0});
+  if (type === 'index')  return val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (val > 1000)        return val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return val.toFixed(2);
+}
+
+async function fetchSnapshot(displayKey) {
+  const info = SYMBOL_MAP[displayKey];
   if (!info) return;
-  const fhSym = info.fh;
+  const { poly, type } = info;
 
   let url;
-  if (info.isFx) {
-    // Forex: use OANDA format, strip the colon for the API call
-    url = `https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FINNHUB_KEY}`;
-  } else if (info.isCrypto) {
-    url = `https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FINNHUB_KEY}`;
-  } else {
-    url = `https://finnhub.io/api/v1/quote?symbol=${fhSym}&token=${FINNHUB_KEY}`;
-  }
+  if (type === 'forex')  url = `${BASE}/v2/snapshot/locale/global/markets/forex/tickers/${poly}?apiKey=${POLYGON_KEY}`;
+  else if (type === 'crypto') url = `${BASE}/v2/snapshot/locale/global/markets/crypto/tickers/${poly}?apiKey=${POLYGON_KEY}`;
+  else if (type === 'index')  url = `${BASE}/v3/snapshot?ticker.any_of=${poly}&apiKey=${POLYGON_KEY}`;
+  else url = `${BASE}/v2/snapshot/locale/us/markets/stocks/tickers/${poly}?apiKey=${POLYGON_KEY}`;
 
   try {
     const res = await fetch(url);
     const d = await res.json();
-    if (!d || !d.c) return;
-    const price = d.c;
-    const prevClose = d.pc;
-    const change = price - prevClose;
-    const pct = prevClose ? (change / prevClose) * 100 : 0;
-    priceCache[displaySym] = {
-      price: formatPrice(price, displaySym, info),
+    let price, pct;
+
+    if (type === 'forex') {
+      const t = d?.ticker;
+      price = t?.day?.c || t?.lastQuote?.a;
+      const prev = t?.prevDay?.c;
+      pct = prev && price ? ((price - prev) / prev) * 100 : 0;
+    } else if (type === 'crypto') {
+      const t = d?.ticker;
+      price = t?.day?.c || t?.lastTrade?.p;
+      pct = t?.todaysChangePerc || 0;
+    } else if (type === 'index') {
+      const t = d?.results?.[0];
+      price = t?.value || t?.session?.close;
+      const prev = t?.session?.previous_close;
+      pct = prev && price ? ((price - prev) / prev) * 100 : (t?.todaysChangePerc || 0);
+    } else {
+      const t = d?.ticker;
+      price = t?.day?.c || t?.lastTrade?.p;
+      pct = t?.todaysChangePerc || 0;
+    }
+
+    if (!price) return;
+    priceCache[displayKey] = {
+      price: formatPrice(price, type),
       change: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%',
       up: pct >= 0
     };
   } catch(e) {
-    console.warn('Finnhub fetch failed for', displaySym, e);
+    console.warn('Polygon fetch failed:', displayKey, e);
   }
-}
-
-function formatPrice(val, sym, info) {
-  if (!val) return '—';
-  if (info && info.isFx) return val.toFixed(4);
-  if (info && info.isCrypto) return val.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
-  if (val > 10000) return val.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
-  if (val > 100) return val.toFixed(2);
-  return val.toFixed(2);
 }
 
 // ─── LOAD ALL PRICES ─────────────────────────────────────────────────────────
 async function loadAllPrices() {
-  if (FINNHUB_KEY === 'YOUR_API_KEY_HERE') {
-    document.getElementById('data-status').innerHTML = '⚠ Add your Finnhub API key to activate live data';
-    return;
-  }
-
-  const allSymbols = [...new Set([
-    ...TICKER_SYMBOLS,
-    ...EVENTS.flatMap(e => e.tickers)
-  ])];
-
   document.getElementById('data-status').innerHTML = '<span class="spin">⟳</span> Fetching live market data…';
+  const delay = ms => new Promise(r => setTimeout(r, ms));
 
-  // Fetch all in parallel — Finnhub handles it
-  // Stagger slightly to respect rate limit (60 calls/min free tier)
-  const delay = (ms) => new Promise(r => setTimeout(r, ms));
-  for (let i = 0; i < allSymbols.length; i++) {
-    fetchFinnhubQuote(allSymbols[i]);
-    if (i % 10 === 9) await delay(1000); // brief pause every 10 calls
+  // All unique keys we need
+  const allKeys = [...new Set([...TICKER_SYMBOLS, ...EVENTS.flatMap(e => e.tickers)])];
+
+  // Fetch with slight stagger to be polite to API
+  for (let i = 0; i < allKeys.length; i++) {
+    fetchSnapshot(allKeys[i]);
+    if (i % 5 === 4) await delay(200);
   }
 
-  // Wait a bit then render
-  await delay(3000);
+  await delay(2500);
   pricesLoaded = true;
   document.getElementById('data-status').classList.add('hidden');
   renderTickerBar();
@@ -586,29 +593,20 @@ function renderDetailPanel(id) {
   `;
 }
 
-// Simple correlation scores per event (based on research, not advice)
 const correlationMap = {
-  "NG=F":88,"CL=F":72,"ZW=F":92,"ZC=F":65,"LMT":78,"BAESY":74,
-  "BZ=F":95,"FRO":85,"STNG":88,
+  "UNG":88,"USO":72,"WEAT":92,"CORN":65,"LMT":78,"BAESY":74,
+  "BNO":95,"FRO":85,"STNG":88,
   "TSM":90,"NVDA":72,"ASML":78,"SOXX":70,
   "CCJ":85,"NXE":80,"URA":82,
-  "ZS=F":62,"ARGT":75,
-  "EURUSD=X":88,"EURCHF=X":70,"EWG":64,"FXE":66,
-  "JPY=X":92,"^N225":78,"EWJ":72
+  "SOYB":62,"ARGT":75,
+  "EURUSD":88,"EURCHF":70,"EWG":64,"FXE":66,
+  "USDJPY":92,"NDX":78,"EWJ":72
 };
 function getImpactPct(sym) { return correlationMap[sym] || 55; }
 
-const assetNames = {
-  "NG=F":"Natural Gas Futures","CL=F":"WTI Crude Oil","ZW=F":"Wheat Futures","ZC=F":"Corn Futures",
-  "LMT":"Lockheed Martin","BAESY":"BAE Systems","BZ=F":"Brent Crude",
-  "FRO":"Frontline plc","STNG":"Scorpio Tankers",
-  "TSM":"Taiwan Semiconductor","NVDA":"NVIDIA","ASML":"ASML Holding","SOXX":"PHLX Semiconductor ETF",
-  "CCJ":"Cameco Corp","NXE":"NexGen Energy","URA":"Global X Uranium ETF",
-  "ZS=F":"Soybean Futures","ARGT":"Global X MSCI Argentina ETF",
-  "EURUSD=X":"EUR / USD","EURCHF=X":"EUR / CHF","EWG":"iShares Germany ETF","FXE":"Invesco CurrencyShares Euro",
-  "JPY=X":"USD / JPY","^N225":"Nikkei 225","EWJ":"iShares MSCI Japan ETF"
-};
-function getAssetName(sym) { return assetNames[sym] || sym; }
+function getAssetName(sym) {
+  return (SYMBOL_MAP[sym] && SYMBOL_MAP[sym].label) || sym;
+}
 
 // ─── START ───────────────────────────────────────────────────────────────────
 loadAllPrices();
