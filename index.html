@@ -209,7 +209,7 @@
   <div class="left-panel">
     <div class="panel-header">
       <span class="panel-title">Active Events</span>
-      <span class="event-count" id="ev-count">7</span>
+      <span class="event-count" id="ev-count">22</span>
     </div>
     <div class="events-list" id="events-list"></div>
   </div>
@@ -321,6 +321,156 @@ const EVENTS = [
     tickers:["YCS","EWJ"],
     tickerGroups:{ "FX & Equity":["YCS","EWJ"] },
     context:"Japan holds approximately $1.1 trillion in US Treasuries. Historical BoJ tightening cycles have correlated with USD/JPY moves of 5–15%. The yen carry trade (borrowing JPY to buy higher-yielding assets) historically unwinds rapidly during BoJ tightening, affecting AUD, NZD, and EM assets. Nikkei exporters historically underperform when JPY strengthens more than 5%."
+  },
+  {
+    id:8, lat:31.5, lng:34.8,
+    title:"Middle East Ceasefire Fragility",
+    region:"Middle East", severity:"critical", date:"Ongoing",
+    summary:"Gaza ceasefire under pressure. Regional spillover risk elevated. Energy infrastructure in broader region on alert.",
+    tags:["Armed Conflict","Energy Risk","Regional Stability"],
+    tickers:["USO","BNO","LMT","RTX"],
+    tickerGroups:{ "Energy":["USO","BNO"], "Defense":["LMT","RTX"] },
+    context:"Middle East conflicts have historically caused Brent crude spikes of 5–15% during acute escalation phases. The region accounts for approximately 30% of global oil production. Defense sector historically outperforms during prolonged regional conflicts. Israeli shekel and regional EM currencies show elevated volatility correlated with conflict intensity."
+  },
+  {
+    id:9, lat:39.9, lng:116.4,
+    title:"China Property Sector Debt Crisis",
+    region:"East Asia", severity:"critical", date:"Ongoing",
+    summary:"Evergrande liquidation ongoing. Country Garden restructuring active. $300B+ in offshore bonds affected. Beijing stimulus measures insufficient to stabilize.",
+    tags:["Credit Risk","Property","China EM"],
+    tickers:["FXI","KWEB","VALE","BHP"],
+    tickerGroups:{ "China Equity":["FXI","KWEB"], "Commodities":["VALE","BHP"] },
+    context:"Chinese property sector represents approximately 25–30% of Chinese GDP. Historical analysis shows property downturns in China correlate with 15–30% drawdowns in iron ore and copper prices, impacting Australian and Brazilian miners directly. FXI (China ETF) has historically shown -20% to -40% drawdown periods during major property stress events."
+  },
+  {
+    id:10, lat:28.6, lng:77.2,
+    title:"India Infrastructure Supercycle",
+    region:"South Asia", severity:"low", date:"Ongoing",
+    summary:"India $1.4T infrastructure spend underway. Manufacturing FDI at record highs. China+1 supply chain migration accelerating.",
+    tags:["EM Growth","Infrastructure","Supply Chain"],
+    tickers:["INDA","INDY","VALE","FCX"],
+    tickerGroups:{ "India Equity":["INDA","INDY"], "Materials":["VALE","FCX"] },
+    context:"India infrastructure spending historically correlates with 20–40% outperformance of Indian equity ETFs vs. EM benchmarks over 3-year cycles. Steel and copper demand from India has been one of the primary demand growth drivers for these commodities since 2021. FCX (copper miner) historically shows strong correlation with EM infrastructure cycles."
+  },
+  {
+    id:11, lat:-15.8, lng:-47.9,
+    title:"Brazil Election Uncertainty & Fiscal Risk",
+    region:"South America", severity:"medium", date:"Ongoing",
+    summary:"Lula fiscal expansion raising debt sustainability concerns. Central bank hawkish. Real under pressure. Agricultural exports remain strong.",
+    tags:["Political Risk","Fiscal Policy","Agriculture"],
+    tickers:["EWZ","SOYB","VALE","BRZU"],
+    tickerGroups:{ "Brazil Equity":["EWZ","BRZU"], "Commodities":["SOYB","VALE"] },
+    context:"Brazil is the world's largest soybean exporter (~35% global share) and major iron ore producer. BRL depreciation historically correlates with agricultural export acceleration (exporters benefit from weaker currency). EWZ (Brazil ETF) has shown 30–50% drawdowns during Brazilian fiscal crises historically. VALE (iron ore/nickel) closely tracks Chinese demand signals."
+  },
+  {
+    id:12, lat:-1.3, lng:36.8,
+    title:"Congo-Kenya Lithium Corridor Development",
+    region:"East Africa", severity:"low", date:"Ongoing",
+    summary:"DRC lithium and cobalt extraction expanding. Chinese and Western companies competing for long-term offtake agreements. Critical for EV supply chains.",
+    tags:["Critical Minerals","EV Supply Chain","China Competition"],
+    tickers:["ALB","SQM","LTHM","LIT"],
+    tickerGroups:{ "Lithium & EV Minerals":["ALB","SQM","LTHM","LIT"] },
+    context:"DRC holds approximately 70% of global cobalt reserves and significant lithium deposits. Historical lithium price cycles show 200–400% swings tied to EV adoption pace. ALB (Albemarle) and SQM are the largest publicly traded lithium producers and historically show 80%+ correlation to lithium carbonate spot prices. Western supply chain diversification away from Chinese processing is a multi-year structural theme."
+  },
+  {
+    id:13, lat:41.0, lng:29.0,
+    title:"Turkey Inflation & Lira Stabilization",
+    region:"Eastern Europe / Middle East", severity:"high", date:"Ongoing",
+    summary:"Turkish inflation above 60%. Unorthodox monetary policy reversed. Lira lost 80%+ over 5 years. Tourism and defense exports offsetting capital outflows.",
+    tags:["EM Currency","Inflation","Monetary Policy"],
+    tickers:["TUR","EEM","SPY"],
+    tickerGroups:{ "EM Equity":["TUR","EEM"] },
+    context:"Turkey's inflation crisis has been one of the most severe EM currency devaluations of the decade. TUR (iShares Turkey ETF) has historically shown -60% to -70% drawdowns in USD terms during lira crises. Turkey is a NATO member and geopolitically significant, making its instability a contagion risk for broader EM assets. EEM historically shows -5% to -10% correlation effects during severe Turkish stress."
+  },
+  {
+    id:14, lat:25.2, lng:55.3,
+    title:"Saudi Arabia OPEC+ Production Strategy",
+    region:"Gulf States", severity:"high", date:"Ongoing",
+    summary:"Saudi Arabia extending voluntary production cuts. OPEC+ cohesion under strain. Non-OPEC supply growth from US Permian offsetting cuts.",
+    tags:["OPEC","Oil Supply","Energy Policy"],
+    tickers:["USO","BNO","UNG","XOM"],
+    tickerGroups:{ "Energy":["USO","BNO","UNG","XOM"] },
+    context:"Saudi Arabia controls approximately 12% of global oil production as swing producer. Historical OPEC+ cut announcements have correlated with 5–10% WTI price increases in the week following. US shale (Permian Basin) breakeven at ~$50/barrel has historically capped upside when Brent exceeds $85–90. XOM (ExxonMobil) historically tracks Brent crude with ~75% correlation over 6-month periods."
+  },
+  {
+    id:15, lat:60.2, lng:11.1,
+    title:"Nordic Offshore Wind Energy Expansion",
+    region:"Northern Europe", severity:"low", date:"Ongoing",
+    summary:"Norway, Denmark, Sweden accelerating offshore wind. European energy independence push post-Ukraine war. €500B+ investment pipeline through 2030.",
+    tags:["Energy Transition","Renewables","Infrastructure"],
+    tickers:["ICLN","QCLN","NEE","ENPH"],
+    tickerGroups:{ "Clean Energy":["ICLN","QCLN","NEE","ENPH"] },
+    context:"European offshore wind capacity is expected to triple by 2030 according to industry forecasts. ICLN and QCLN (clean energy ETFs) have historically shown high volatility tied to interest rate cycles (renewable project economics are rate-sensitive). NEE (NextEra) is the world's largest renewable energy company and serves as a proxy for the sector. Each 100bps rise in interest rates has historically correlated with ~15% drawdown in renewable energy equities."
+  },
+  {
+    id:16, lat:19.4, lng:-99.1,
+    title:"Mexico Nearshoring Boom — China+1",
+    region:"North America", severity:"low", date:"Ongoing",
+    summary:"Record FDI into Mexico manufacturing. US-China decoupling driving factory relocation. Border infrastructure under strain. Peso near multi-year highs.",
+    tags:["Nearshoring","FDI","EM Opportunity"],
+    tickers:["EWW","MEXX","FCX","AMT"],
+    tickerGroups:{ "Mexico Equity":["EWW","MEXX"], "Infrastructure":["FCX","AMT"] },
+    context:"Mexico became the largest US trading partner in 2023, overtaking China. EWW (Mexico ETF) historically shows strong correlation with US manufacturing PMI and USD/MXN. The peso has been one of the strongest EM currencies in recent years, driven by remittance flows and FDI. Copper (FCX) benefits directly from manufacturing expansion — each major nearshoring factory requires significant electrical infrastructure."
+  },
+  {
+    id:17, lat:-33.9, lng:18.4,
+    title:"South Africa Energy Crisis & BRICS Expansion",
+    region:"Southern Africa", severity:"high", date:"Ongoing",
+    summary:"Eskom load-shedding constraining GDP growth. Platinum and gold production affected. BRICS expansion raising geopolitical alignment questions.",
+    tags:["Energy Crisis","Mining","BRICS"],
+    tickers:["EZA","GDX","PPLT","PALL"],
+    tickerGroups:{ "South Africa":["EZA"], "Precious Metals":["GDX","PPLT","PALL"] },
+    context:"South Africa produces approximately 70% of global platinum and 35% of palladium. Load-shedding has historically reduced platinum group metal output by 5–10% per severe cycle. PPLT and PALL (platinum/palladium ETFs) show direct correlation with SA production disruptions. GDX (gold miners) broadly tracks SA mining conditions. Palladium is critical for catalytic converters — auto sector supply chains directly impacted."
+  },
+  {
+    id:18, lat:55.8, lng:37.6,
+    title:"Russia Sanctions & Energy Rerouting",
+    region:"Eastern Europe", severity:"high", date:"Ongoing",
+    summary:"Russian oil flowing to India and China at discount. G7 price cap enforcement weakening. European gas storage above average. LNG infrastructure build-out accelerating.",
+    tags:["Sanctions","LNG","Energy Rerouting"],
+    tickers:["UNG","LNG","TELL","EWW"],
+    tickerGroups:{ "LNG & Gas":["UNG","LNG","TELL"] },
+    context:"Russia historically supplied ~40% of European natural gas. Post-2022, US LNG exports to Europe have surged, with Henry Hub-to-TTF spread a key monitoring metric. LNG (Cheniere Energy) and TELL (Tellurian) are primary US LNG export beneficiaries. Natural gas storage levels in Europe above 5-year average historically correlate with reduced TTF-Henry Hub spread."
+  },
+  {
+    id:19, lat:35.9, lng:128.6,
+    title:"South Korea Semiconductor Export Controls",
+    region:"East Asia", severity:"medium", date:"Ongoing",
+    summary:"US-aligned export controls on advanced chip equipment to China tightening. Samsung and SK Hynix receiving exemptions under review. Memory chip cycle turning.",
+    tags:["Semiconductors","Export Controls","Memory"],
+    tickers:["SOXX","NVDA","ASML","TSM"],
+    tickerGroups:{ "Semiconductors":["SOXX","NVDA","ASML","TSM"] },
+    context:"South Korea produces approximately 60% of global DRAM and 45% of NAND flash memory. Memory chip cycles historically show 18–24 month boom-bust patterns. SOXX has historically shown 40–60% peak-to-trough moves during memory downturns. ASML (lithography equipment) is the single-source supplier of EUV machines — its export restrictions to China are a structural constraint on Chinese chip advancement."
+  },
+  {
+    id:20, lat:-23.5, lng:133.0,
+    title:"Australia-China Iron Ore Dependency",
+    region:"Asia Pacific", severity:"medium", date:"Ongoing",
+    summary:"Australia exports ~800Mt iron ore annually, 80%+ to China. Chinese property slowdown reducing steel demand. Pilbara miners monitoring Chinese stimulus signals closely.",
+    tags:["Iron Ore","China Demand","Mining"],
+    tickers:["BHP","VALE","RIO","FCX"],
+    tickerGroups:{ "Mining":["BHP","VALE","RIO","FCX"] },
+    context:"Iron ore price is primarily driven by Chinese steel production, which in turn reflects property and infrastructure activity. Historical iron ore price cycles show 50–70% drawdowns during Chinese property stress. BHP and RIO (major Pilbara producers) historically show 60–80% correlation to iron ore spot prices. Each $10/tonne move in iron ore spot historically impacts BHP earnings by approximately $500M annually."
+  },
+  {
+    id:21, lat:35.7, lng:51.4,
+    title:"Iran Nuclear Program Escalation Risk",
+    region:"Middle East", severity:"critical", date:"Ongoing",
+    summary:"IAEA reports uranium enrichment near weapons-grade. US and Israel signaling military options. Strait of Hormuz closure risk at multi-year high.",
+    tags:["Nuclear Risk","Oil Supply","Geopolitical Premium"],
+    tickers:["USO","BNO","LMT","RTX"],
+    tickerGroups:{ "Energy":["USO","BNO"], "Defense":["LMT","RTX"] },
+    context:"Iran controls access to the Strait of Hormuz (20% of global oil trade). Historical Iran nuclear crisis events (2011–2012) correlated with Brent crude at $120–125/barrel. A military strike scenario has historically been priced as a $20–40 Brent premium in options markets. Gold historically surges 5–10% during acute Middle East nuclear escalation events as a safe-haven."
+  },
+  {
+    id:22, lat:4.9, lng:114.9,
+    title:"South China Sea Territorial Disputes",
+    region:"Southeast Asia", severity:"high", date:"Ongoing",
+    summary:"Philippines-China maritime confrontations intensifying. US defense commitments being tested. ASEAN shipping lanes monitoring elevated.",
+    tags:["Territorial Dispute","Shipping","US-China"],
+    tickers:["FXI","EWY","SOXX","TSM"],
+    tickerGroups:{ "Regional Equity":["FXI","EWY"], "Tech":["SOXX","TSM"] },
+    context:"South China Sea carries approximately $3.4 trillion in annual trade. Historical escalation events in this region have correlated with 3–8% drawdowns in regional equity ETFs (EWY, EWY). TSM (TSMC) is particularly sensitive given Taiwan's proximity. Philippines peso and Indonesian rupiah historically depreciate 2–5% during acute South China Sea confrontations."
   }
 ];
 
@@ -426,13 +576,11 @@ async function loadAllPrices() {
   document.getElementById('data-status').innerHTML = '<span class="spin">⟳</span> Fetching live market data…';
   const delay = ms => new Promise(r => setTimeout(r, ms));
 
-  // 1. Ticker bar — via Vercel serverless → Yahoo Finance (real indices + forex)
-  fetchTickerBar();
+  // All keys: ticker bar + event panels — all via Polygon
+  const allKeys = [...new Set([...TICKER_SYMBOLS, ...EVENTS.flatMap(e => e.tickers)])];
 
-  // 2. Event panel assets — via Polygon (stocks + ETFs)
-  const eventKeys = [...new Set(EVENTS.flatMap(e => e.tickers))];
-  for (let i = 0; i < eventKeys.length; i++) {
-    fetchSnapshot(eventKeys[i]);
+  for (let i = 0; i < allKeys.length; i++) {
+    fetchSnapshot(allKeys[i]);
     if (i % 5 === 4) await delay(200);
   }
 
@@ -441,40 +589,6 @@ async function loadAllPrices() {
   document.getElementById('data-status').classList.add('hidden');
   renderTickerBar();
   if (selectedId) renderDetailPanel(selectedId);
-}
-
-// Fetch ticker bar prices via our Vercel serverless function → Yahoo Finance
-async function fetchTickerBar() {
-  try {
-    const syms = TICKER_SYMBOLS.join(',');
-    const res = await fetch(`/api/quotes?symbols=${encodeURIComponent(syms)}`);
-    const data = await res.json();
-
-    TICKER_SYMBOLS.forEach(sym => {
-      const q = data[sym];
-      if (!q || !q.price) return;
-      const pct = q.pct || 0;
-      priceCache[sym] = {
-        price:  formatYahooPrice(q.price, sym),
-        change: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%',
-        up: pct >= 0
-      };
-    });
-    renderTickerBar();
-  } catch(e) {
-    console.warn('Ticker bar fetch failed:', e.message);
-  }
-}
-
-function formatYahooPrice(val, sym) {
-  if (!val) return '—';
-  if (sym === 'JPY=X') return val.toFixed(2);
-  if (sym.includes('=X')) return val.toFixed(4);
-  if (sym === 'BTC-USD') return val.toLocaleString('en-US', {maximumFractionDigits:0});
-  if (sym === '^TNX') return val.toFixed(2) + '%';
-  if (val > 10000) return val.toLocaleString('en-US', {maximumFractionDigits:0});
-  if (val > 100)   return val.toFixed(2);
-  return val.toFixed(2);
 }
 
 // ─── TICKER BAR ──────────────────────────────────────────────────────────────
