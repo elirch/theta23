@@ -308,8 +308,8 @@ const EVENTS = [
     region:"Western Europe", severity:"medium", date:"Ongoing",
     summary:"ECB communications shifting toward accommodation. Euro area inflation data monitoring ongoing. Rate path repricing underway.",
     tags:["Monetary Policy","ECB","Rate Cycle"],
-    tickers:["EURUSD","EURCHF","EWG","FXE"],
-    tickerGroups:{ "FX":["EURUSD","EURCHF"], "Europe Equity":["EWG","FXE"] },
+    tickers:["FXE","EWG"],
+    tickerGroups:{ "FX & Europe Equity":["FXE","EWG"] },
     context:"Historically, ECB rate cut cycles have preceded EUR/USD weakness of 3–8% over 6 months. Export-heavy European equities (autos, industrials) have historically outperformed during EUR depreciation periods. Bund yields have historically compressed 40–80bps in the 3 months following a first ECB cut."
   },
   {
@@ -318,14 +318,14 @@ const EVENTS = [
     region:"East Asia", severity:"medium", date:"Ongoing",
     summary:"BoJ moving away from ultra-loose policy. JGB yield caps removed. Yen carry trade unwind dynamics active.",
     tags:["Monetary Policy","JPY","Capital Flows"],
-    tickers:["USDJPY","NDX","EWJ"],
-    tickerGroups:{ "FX & Equity":["USDJPY","NDX","EWJ"] },
+    tickers:["YCS","EWJ"],
+    tickerGroups:{ "FX & Equity":["YCS","EWJ"] },
     context:"Japan holds approximately $1.1 trillion in US Treasuries. Historical BoJ tightening cycles have correlated with USD/JPY moves of 5–15%. The yen carry trade (borrowing JPY to buy higher-yielding assets) historically unwinds rapidly during BoJ tightening, affecting AUD, NZD, and EM assets. Nikkei exporters historically underperform when JPY strengthens more than 5%."
   }
 ];
 
 // Bottom bar tickers (Yahoo Finance symbols)
-const TICKER_SYMBOLS = ["SPX","NDX","DJI","USO","GLD","UNG","EURUSD","USDJPY","IEF","BTCUSD","WEAT","SOYB"];
+const TICKER_SYMBOLS = ["SPY","QQQ","DIA","USO","GLD","UNG","FXE","YCS","IEF","BTCUSD","WEAT","SOYB"];
 const TICKER_LABELS  = ["S&P 500","NASDAQ","DOW","WTI OIL","GOLD","NAT GAS","EUR/USD","USD/JPY","10Y UST","BTC/USD","WHEAT","SOYBEANS"];
 
 // ─── POLYGON (MASSIVE) CONFIG ────────────────────────────────────────────────
@@ -335,39 +335,37 @@ const BASE = 'https://api.polygon.io';
 // Symbol map: displayKey → { poly, label, type }
 // types: stock | index | forex | crypto | etf
 const SYMBOL_MAP = {
-  // ── Ticker bar ──────────────────────────────────────────────────
-  "SPX":       { poly:"I:SPX",      label:"S&P 500",   type:"index"  },
-  "NDX":       { poly:"I:NDX",      label:"NASDAQ",    type:"index"  },
-  "DJI":       { poly:"I:DJI",      label:"DOW",       type:"index"  },
-  "USO":       { poly:"USO",        label:"WTI OIL",   type:"etf"    },
-  "GLD":       { poly:"GLD",        label:"GOLD",      type:"etf"    },
-  "UNG":       { poly:"UNG",        label:"NAT GAS",   type:"etf"    },
-  "EURUSD":    { poly:"C:EURUSD",   label:"EUR/USD",   type:"forex"  },
-  "USDJPY":    { poly:"C:USDJPY",   label:"USD/JPY",   type:"forex"  },
-  "IEF":       { poly:"IEF",        label:"10Y UST",   type:"etf"    },
-  "BTCUSD":    { poly:"X:BTCUSD",   label:"BTC/USD",   type:"crypto" },
-  "WEAT":      { poly:"WEAT",       label:"WHEAT",     type:"etf"    },
-  "SOYB":      { poly:"SOYB",       label:"SOYBEANS",  type:"etf"    },
+  // ── Ticker bar — ETFs only, 100% reliable on Starter plan ──────
+  "SPY":    { poly:"SPY",      label:"S&P 500",   type:"etf"    },
+  "QQQ":    { poly:"QQQ",      label:"NASDAQ",    type:"etf"    },
+  "DIA":    { poly:"DIA",      label:"DOW",       type:"etf"    },
+  "USO":    { poly:"USO",      label:"WTI OIL",   type:"etf"    },
+  "GLD":    { poly:"GLD",      label:"GOLD",      type:"etf"    },
+  "UNG":    { poly:"UNG",      label:"NAT GAS",   type:"etf"    },
+  "FXE":    { poly:"FXE",      label:"EUR/USD",   type:"etf"    },
+  "YCS":    { poly:"YCS",      label:"USD/JPY",   type:"etf"    },
+  "IEF":    { poly:"IEF",      label:"10Y UST",   type:"etf"    },
+  "GBTC":   { poly:"GBTC",     label:"BTC/USD",   type:"etf"    },
+  "WEAT":   { poly:"WEAT",     label:"WHEAT",     type:"etf"    },
+  "SOYB":   { poly:"SOYB",     label:"SOYBEANS",  type:"etf"    },
   // ── Event assets ────────────────────────────────────────────────
-  "LMT":       { poly:"LMT",        label:"Lockheed Martin",    type:"stock" },
-  "BAESY":     { poly:"BAESY",      label:"BAE Systems",        type:"stock" },
-  "BNO":       { poly:"BNO",        label:"Brent Oil ETF",      type:"etf"   },
-  "FRO":       { poly:"FRO",        label:"Frontline",          type:"stock" },
-  "STNG":      { poly:"STNG",       label:"Scorpio Tankers",    type:"stock" },
-  "TSM":       { poly:"TSM",        label:"Taiwan Semiconductor",type:"stock"},
-  "NVDA":      { poly:"NVDA",       label:"NVIDIA",             type:"stock" },
-  "ASML":      { poly:"ASML",       label:"ASML Holding",       type:"stock" },
-  "SOXX":      { poly:"SOXX",       label:"PHLX Semi ETF",      type:"etf"   },
-  "CCJ":       { poly:"CCJ",        label:"Cameco Corp",        type:"stock" },
-  "NXE":       { poly:"NXE",        label:"NexGen Energy",      type:"stock" },
-  "URA":       { poly:"URA",        label:"Uranium ETF",        type:"etf"   },
-  "CORN":      { poly:"CORN",       label:"Corn ETF",           type:"etf"   },
-  "ARGT":      { poly:"ARGT",       label:"Argentina ETF",      type:"etf"   },
-  "EURCHF":    { poly:"C:EURCHF",   label:"EUR/CHF",            type:"forex" },
-  "EWG":       { poly:"EWG",        label:"Germany ETF",        type:"etf"   },
-  "FXE":       { poly:"FXE",        label:"Euro ETF",           type:"etf"   },
-  "EWJ":       { poly:"EWJ",        label:"Japan ETF",          type:"etf"   },
-  "RTX":       { poly:"RTX",        label:"Raytheon",           type:"stock" },
+  "LMT":    { poly:"LMT",      label:"Lockheed Martin",      type:"stock" },
+  "BAESY":  { poly:"BAESY",    label:"BAE Systems",          type:"stock" },
+  "BNO":    { poly:"BNO",      label:"Brent Oil ETF",        type:"etf"   },
+  "FRO":    { poly:"FRO",      label:"Frontline",            type:"stock" },
+  "STNG":   { poly:"STNG",     label:"Scorpio Tankers",      type:"stock" },
+  "TSM":    { poly:"TSM",      label:"Taiwan Semiconductor", type:"stock" },
+  "NVDA":   { poly:"NVDA",     label:"NVIDIA",               type:"stock" },
+  "ASML":   { poly:"ASML",     label:"ASML Holding",         type:"stock" },
+  "SOXX":   { poly:"SOXX",     label:"PHLX Semi ETF",        type:"etf"   },
+  "CCJ":    { poly:"CCJ",      label:"Cameco Corp",          type:"stock" },
+  "NXE":    { poly:"NXE",      label:"NexGen Energy",        type:"stock" },
+  "URA":    { poly:"URA",      label:"Uranium ETF",          type:"etf"   },
+  "CORN":   { poly:"CORN",     label:"Corn ETF",             type:"etf"   },
+  "ARGT":   { poly:"ARGT",     label:"Argentina ETF",        type:"etf"   },
+  "EWG":    { poly:"EWG",      label:"Germany ETF",          type:"etf"   },
+  "EWJ":    { poly:"EWJ",      label:"Japan ETF",            type:"etf"   },
+  "RTX":    { poly:"RTX",      label:"Raytheon",             type:"stock" },
 };
 
 // Update EVENTS tickers to use new keys
@@ -428,12 +426,13 @@ async function loadAllPrices() {
   document.getElementById('data-status').innerHTML = '<span class="spin">⟳</span> Fetching live market data…';
   const delay = ms => new Promise(r => setTimeout(r, ms));
 
-  // All unique keys we need
-  const allKeys = [...new Set([...TICKER_SYMBOLS, ...EVENTS.flatMap(e => e.tickers)])];
+  // 1. Ticker bar — via Vercel serverless → Yahoo Finance (real indices + forex)
+  fetchTickerBar();
 
-  // Fetch with slight stagger to be polite to API
-  for (let i = 0; i < allKeys.length; i++) {
-    fetchSnapshot(allKeys[i]);
+  // 2. Event panel assets — via Polygon (stocks + ETFs)
+  const eventKeys = [...new Set(EVENTS.flatMap(e => e.tickers))];
+  for (let i = 0; i < eventKeys.length; i++) {
+    fetchSnapshot(eventKeys[i]);
     if (i % 5 === 4) await delay(200);
   }
 
@@ -442,6 +441,40 @@ async function loadAllPrices() {
   document.getElementById('data-status').classList.add('hidden');
   renderTickerBar();
   if (selectedId) renderDetailPanel(selectedId);
+}
+
+// Fetch ticker bar prices via our Vercel serverless function → Yahoo Finance
+async function fetchTickerBar() {
+  try {
+    const syms = TICKER_SYMBOLS.join(',');
+    const res = await fetch(`/api/quotes?symbols=${encodeURIComponent(syms)}`);
+    const data = await res.json();
+
+    TICKER_SYMBOLS.forEach(sym => {
+      const q = data[sym];
+      if (!q || !q.price) return;
+      const pct = q.pct || 0;
+      priceCache[sym] = {
+        price:  formatYahooPrice(q.price, sym),
+        change: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%',
+        up: pct >= 0
+      };
+    });
+    renderTickerBar();
+  } catch(e) {
+    console.warn('Ticker bar fetch failed:', e.message);
+  }
+}
+
+function formatYahooPrice(val, sym) {
+  if (!val) return '—';
+  if (sym === 'JPY=X') return val.toFixed(2);
+  if (sym.includes('=X')) return val.toFixed(4);
+  if (sym === 'BTC-USD') return val.toLocaleString('en-US', {maximumFractionDigits:0});
+  if (sym === '^TNX') return val.toFixed(2) + '%';
+  if (val > 10000) return val.toLocaleString('en-US', {maximumFractionDigits:0});
+  if (val > 100)   return val.toFixed(2);
+  return val.toFixed(2);
 }
 
 // ─── TICKER BAR ──────────────────────────────────────────────────────────────
