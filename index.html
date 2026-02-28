@@ -175,6 +175,58 @@
 
   @keyframes fadeInRight { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
   .right-panel:not(.hidden) > * { animation:fadeInRight 0.2s ease forwards; }
+
+  /* ── COMMODITIES PAGE ─────────────────────────────────── */
+  .page { display:none; flex:1; overflow:hidden; }
+  .page.active { display:flex; }
+  #page-map { display:flex; }
+
+  .commodities-layout { display:flex; flex:1; overflow:hidden; }
+  .comm-sidebar { width:220px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+  .comm-sidebar::-webkit-scrollbar { width:4px; }
+  .comm-sidebar::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+  .comm-main { flex:1; overflow-y:auto; padding:24px; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+  .comm-main::-webkit-scrollbar { width:6px; }
+  .comm-main::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+  .comm-group-btn { padding:12px 18px; font-family:"Space Mono",monospace; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); cursor:pointer; border-bottom:1px solid var(--border); transition:all 0.15s; display:flex; align-items:center; gap:8px; }
+  .comm-group-btn:hover { background:var(--surface2); color:var(--text-dim); }
+  .comm-group-btn.active { background:rgba(0,212,255,0.06); color:var(--accent); border-left:3px solid var(--accent); }
+  .comm-group-icon { font-size:14px; }
+
+  .comm-section-title { font-family:"Space Mono",monospace; font-size:10px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted); margin-bottom:20px; display:flex; align-items:center; gap:12px; }
+  .comm-section-title::after { content:""; flex:1; height:1px; background:var(--border); }
+
+  .comm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-bottom:32px; }
+
+  .comm-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:18px; transition:border-color 0.15s; cursor:default; position:relative; overflow:hidden; }
+  .comm-card::before { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:var(--card-accent,var(--border)); }
+  .comm-card:hover { border-color:var(--border2); }
+
+  .comm-card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+  .comm-card-sym { font-family:"Space Mono",monospace; font-size:13px; font-weight:700; color:var(--text); }
+  .comm-card-name { font-family:"Space Mono",monospace; font-size:10px; color:var(--text-muted); margin-top:2px; }
+  .comm-card-price-wrap { text-align:right; }
+  .comm-card-price { font-family:"Space Mono",monospace; font-size:16px; font-weight:700; color:var(--text); }
+  .comm-card-change { font-family:"Space Mono",monospace; font-size:11px; margin-top:2px; }
+  .comm-card-change.up { color:var(--green); }
+  .comm-card-change.down { color:var(--red); }
+  .comm-card-change.load { color:var(--text-muted); }
+
+  .comm-drivers { margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  .comm-drivers-label { font-family:"Space Mono",monospace; font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+  .comm-driver-item { display:flex; align-items:flex-start; gap:6px; margin-bottom:5px; }
+  .comm-driver-dot { width:5px; height:5px; border-radius:50%; background:var(--card-accent,var(--accent)); flex-shrink:0; margin-top:5px; }
+  .comm-driver-text { font-family:"Space Mono",monospace; font-size:10px; color:var(--text-dim); line-height:1.5; }
+
+  .comm-geo-link { display:inline-flex; align-items:center; gap:4px; margin-top:10px; font-family:"Space Mono",monospace; font-size:9px; color:var(--accent); opacity:0.7; }
+  .comm-geo-link::before { content:"⊕"; font-size:10px; }
+
+  /* Coming soon pages */
+  .page-placeholder { display:flex; flex:1; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+  .placeholder-icon { font-size:48px; opacity:0.3; }
+  .placeholder-title { font-size:22px; font-weight:800; color:var(--text-dim); }
+  .placeholder-sub { font-family:"Space Mono",monospace; font-size:11px; color:var(--text-muted); }
 </style>
 </head>
 <body>
@@ -191,11 +243,11 @@
     <span class="logo-text">θ<span>23</span></span>
   </div>
   <nav class="header-nav">
-    <div class="nav-item active">Geopolitical Map</div>
-    <div class="nav-item">Commodities</div>
-    <div class="nav-item">Macro Events</div>
-    <div class="nav-item">Correlations</div>
-    <div class="nav-item">Reports</div>
+    <div class="nav-item active" onclick="showPage('map')">Geopolitical Map</div>
+    <div class="nav-item" onclick="showPage('commodities')">Commodities</div>
+    <div class="nav-item" onclick="showPage('macro')">Macro Events</div>
+    <div class="nav-item" onclick="showPage('correlations')">Correlations</div>
+    <div class="nav-item" onclick="showPage('reports')">Reports</div>
   </nav>
   <div class="header-right">
     <div class="live-badge"><div class="live-dot"></div>Live Feed</div>
@@ -203,7 +255,7 @@
   </div>
 </header>
 
-<div class="main">
+<div class="main" id="page-map">
 
   <!-- LEFT -->
   <div class="left-panel">
@@ -243,6 +295,59 @@
     </div>
   </div>
 
+</div>
+
+
+<!-- ── COMMODITIES PAGE ───────────────────────────────────────── -->
+<div class="page" id="page-commodities">
+  <div class="commodities-layout">
+
+    <!-- Sidebar -->
+    <div class="comm-sidebar">
+      <div style="padding:14px 18px 10px;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted)">Categories</div>
+      </div>
+      <div class="comm-group-btn active" id="cat-all" onclick="filterComm('all')"><span class="comm-group-icon">🌐</span>All Commodities</div>
+      <div class="comm-group-btn" id="cat-energy" onclick="filterComm('energy')"><span class="comm-group-icon">⚡</span>Energy</div>
+      <div class="comm-group-btn" id="cat-metals" onclick="filterComm('metals')"><span class="comm-group-icon">🥇</span>Precious Metals</div>
+      <div class="comm-group-btn" id="cat-mining" onclick="filterComm('mining')"><span class="comm-group-icon">⛏</span>Mining & Materials</div>
+      <div class="comm-group-btn" id="cat-agri" onclick="filterComm('agri')"><span class="comm-group-icon">🌾</span>Agriculture</div>
+      <div class="comm-group-btn" id="cat-nuclear" onclick="filterComm('nuclear')"><span class="comm-group-icon">⚛</span>Uranium & Nuclear</div>
+      <div class="comm-group-btn" id="cat-clean" onclick="filterComm('clean')"><span class="comm-group-icon">🌱</span>Clean Energy</div>
+    </div>
+
+    <!-- Main content -->
+    <div class="comm-main" id="comm-main-content">
+      <!-- Dynamically rendered -->
+    </div>
+  </div>
+</div>
+
+<!-- ── MACRO EVENTS PAGE ──────────────────────────────────────── -->
+<div class="page" id="page-macro">
+  <div class="page-placeholder">
+    <div class="placeholder-icon">📊</div>
+    <div class="placeholder-title">Macro Events</div>
+    <div class="placeholder-sub">Central bank decisions · Economic data · Policy shifts — Coming soon</div>
+  </div>
+</div>
+
+<!-- ── CORRELATIONS PAGE ──────────────────────────────────────── -->
+<div class="page" id="page-correlations">
+  <div class="page-placeholder">
+    <div class="placeholder-icon">🔗</div>
+    <div class="placeholder-title">Correlations</div>
+    <div class="placeholder-sub">Cross-asset correlation matrix — Coming soon</div>
+  </div>
+</div>
+
+<!-- ── REPORTS PAGE ───────────────────────────────────────────── -->
+<div class="page" id="page-reports">
+  <div class="page-placeholder">
+    <div class="placeholder-icon">📋</div>
+    <div class="placeholder-title">Reports</div>
+    <div class="placeholder-sub">Weekly intelligence briefs — Coming soon</div>
+  </div>
 </div>
 
 <div class="bottom-bar"><div class="ticker-track" id="ticker-bar"></div></div>
@@ -743,6 +848,149 @@ function getAssetName(sym) {
 loadAllPrices();
 // Refresh prices every 60 seconds
 setInterval(loadAllPrices, 60000);
+
+// ─── PAGE NAVIGATION ─────────────────────────────────────────────────────────
+const PAGES = ['map','commodities','macro','correlations','reports'];
+function showPage(id) {
+  PAGES.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.style.display = (p === id) ? 'flex' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach((n,i) => {
+    const pageMap = ['map','commodities','macro','correlations','reports'];
+    n.classList.toggle('active', pageMap[i] === id);
+  });
+  if (id === 'commodities') renderComm('all');
+}
+
+// ─── COMMODITIES DATA ────────────────────────────────────────────────────────
+const COMM_DATA = [
+  // ENERGY
+  { sym:"USO", name:"US Oil ETF (WTI proxy)", cat:"energy", accent:"#ff6b35",
+    drivers:["OPEC+ production decisions directly impact WTI price","Strait of Hormuz disruption adds geopolitical risk premium","USD strength inversely correlated with oil prices"],
+    geoLinks:["Saudi Arabia OPEC+","Iran Nuclear Risk","Strait of Hormuz"] },
+  { sym:"BNO", name:"Brent Crude Oil ETF", cat:"energy", accent:"#ff6b35",
+    drivers:["Brent trades at premium to WTI due to maritime transport costs","Middle East tensions historically add $5–20 risk premium to Brent","European demand signal stronger in Brent than WTI"] ,
+    geoLinks:["Middle East Ceasefire","Russia Energy Rerouting"] },
+  { sym:"UNG", name:"Natural Gas ETF", cat:"energy", accent:"#ff9f43",
+    drivers:["European gas storage levels key driver post-Ukraine war","LNG export capacity constraining US Henry Hub price upside","Winter demand seasonality creates predictable vol patterns"],
+    geoLinks:["Russia Sanctions & LNG","Nordic Offshore Wind"] },
+  // PRECIOUS METALS
+  { sym:"GLD", name:"Gold ETF (SPDR)", cat:"metals", accent:"#f59e0b",
+    drivers:["Real interest rates inverse correlation — when rates rise, gold falls","Safe-haven demand spikes during geopolitical escalation events","Central bank gold buying at multi-decade highs (2022–2024)"],
+    geoLinks:["Iran Nuclear Risk","Middle East Fragility"] },
+  { sym:"GDX", name:"Gold Miners ETF (VanEck)", cat:"metals", accent:"#f59e0b",
+    drivers:["Gold miners offer leveraged exposure — 2x-3x gold price moves","South Africa energy crisis (load-shedding) reducing output","All-In Sustaining Cost (AISC) ~$1,200–1,400/oz for major miners"],
+    geoLinks:["South Africa Energy Crisis"] },
+  { sym:"PPLT", name:"Platinum ETF (Aberdeen)", cat:"metals", accent:"#e2e8f0",
+    drivers:["South Africa produces ~70% of global platinum supply","Auto sector demand — catalytic converters primary use case","Hydrogen fuel cell adoption could create new demand cycle"],
+    geoLinks:["South Africa Energy Crisis"] },
+  { sym:"PALL", name:"Palladium ETF (Aberdeen)", cat:"metals", accent:"#94a3b8",
+    drivers:["Russia produces ~40% of global palladium — sanctions impact critical","Auto ICE production levels primary demand driver","EV transition structural headwind — palladium not used in EV batteries"],
+    geoLinks:["Russia Sanctions","South Africa Energy Crisis"] },
+  // MINING & MATERIALS
+  { sym:"BHP", name:"BHP Group (Iron Ore/Copper)", cat:"mining", accent:"#60a5fa",
+    drivers:["Chinese property construction is primary iron ore demand driver","Each $10/t iron ore move = ~$500M BHP earnings impact","Copper exposure provides EV/clean energy upside optionality"],
+    geoLinks:["Australia-China Iron Ore","China Property Crisis"] },
+  { sym:"VALE", name:"Vale SA (Iron Ore/Nickel)", cat:"mining", accent:"#60a5fa",
+    drivers:["Brazil political/currency risk adds premium to VALE vs BHP","Nickel exposure to EV battery supply chain","Iron ore price below $100/t historically pressures dividend sustainability"],
+    geoLinks:["Brazil Fiscal Risk","China Property Crisis"] },
+  { sym:"FCX", name:"Freeport-McMoRan (Copper)", cat:"mining", accent:"#f97316",
+    drivers:["Copper is the metal of electrification — EV, grid, solar all require it","Each major nearshoring factory requires significant copper infrastructure","Indonesian operations add political risk premium"],
+    geoLinks:["Mexico Nearshoring","India Infrastructure"] },
+  { sym:"ALB", name:"Albemarle Corp (Lithium)", cat:"mining", accent:"#c084fc",
+    drivers:["Lithium carbonate price collapsed 80%+ from 2022 peak — oversupply","Long-term EV adoption structural demand driver","Chile and Australia operations exposed to different regulatory regimes"],
+    geoLinks:["Congo-Kenya Lithium Corridor"] },
+  { sym:"SQM", name:"SQM — Sociedad Química (Lithium)", cat:"mining", accent:"#c084fc",
+    drivers:["Chile Atacama operations — lowest cost lithium producer globally","Chilean government seeking higher royalties — regulatory risk","Lithium price cycles historically 18–36 months duration"],
+    geoLinks:["Congo-Kenya Lithium Corridor"] },
+  // AGRICULTURE
+  { sym:"WEAT", name:"Wheat ETF (Teucrium)", cat:"agri", accent:"#fbbf24",
+    drivers:["Black Sea corridor disruptions historically spike wheat 20–40%","Russia and Ukraine combined ~30% of global wheat exports","Weather in US Great Plains (La Niña/El Niño) key seasonal driver"],
+    geoLinks:["Russia-Ukraine Escalation"] },
+  { sym:"SOYB", name:"Soybeans ETF (Teucrium)", cat:"agri", accent:"#84cc16",
+    drivers:["Brazil (~35% global share) + US are dominant exporters","Argentine peso instability affects export incentive timing","China demand signal most important single driver for soybean price"],
+    geoLinks:["Argentina IMF Reform","Brazil Fiscal Risk"] },
+  { sym:"CORN", name:"Corn ETF (Teucrium)", cat:"agri", accent:"#eab308",
+    drivers:["Ukraine was major corn exporter — war disrupted supply lanes","Ethanol mandate in US links corn price to oil price","Brazilian safrinha (second crop) increasingly dominant in global supply"],
+    geoLinks:["Russia-Ukraine Escalation"] },
+  // URANIUM & NUCLEAR
+  { sym:"CCJ", name:"Cameco Corp (Uranium)", cat:"nuclear", accent:"#22d3ee",
+    drivers:["Cameco is world's largest publicly traded uranium producer","Spot uranium price correlation with CCJ ~85% over 12-month periods","Kazakh and Sahel supply disruptions historically create supply shocks"],
+    geoLinks:["Sahel Instability — Uranium"] },
+  { sym:"NXE", name:"NexGen Energy (Uranium)", cat:"nuclear", accent:"#22d3ee",
+    drivers:["Arrow deposit in Saskatchewan — highest grade uranium project globally","Junior miner — higher volatility vs CCJ (2-3x beta to uranium price)","Permitting risk and construction timeline are key variables"],
+    geoLinks:["Sahel Instability — Uranium"] },
+  { sym:"URA", name:"Global X Uranium ETF", cat:"nuclear", accent:"#22d3ee",
+    drivers:["Diversified exposure to uranium miners globally","Nuclear renaissance narrative — 20+ countries expanding nuclear capacity","Utilities locking in long-term contracts at higher prices — structural support"],
+    geoLinks:["Sahel Instability — Uranium"] },
+  // CLEAN ENERGY
+  { sym:"ICLN", name:"iShares Global Clean Energy ETF", cat:"clean", accent:"#34d399",
+    drivers:["Rate-sensitive sector — each 100bps rate rise = ~15% sector headwind","IRA (Inflation Reduction Act) $369B clean energy subsidy tailwind","European energy independence push post-Ukraine accelerating capacity"],
+    geoLinks:["Nordic Offshore Wind","Russia Sanctions & LNG"] },
+  { sym:"NEE", name:"NextEra Energy (Renewables)", cat:"clean", accent:"#34d399",
+    drivers:["World's largest renewable energy company by capacity","US regulated utility business provides stable base cash flows","Wind and solar project pipeline visibility 3–5 years forward"],
+    geoLinks:["Nordic Offshore Wind"] },
+];
+
+// ─── RENDER COMMODITIES ───────────────────────────────────────────────────────
+let currentCommFilter = 'all';
+
+function filterComm(cat) {
+  currentCommFilter = cat;
+  document.querySelectorAll('.comm-group-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('cat-' + cat)?.classList.add('active');
+  renderComm(cat);
+}
+
+function renderComm(cat) {
+  const filtered = cat === 'all' ? COMM_DATA : COMM_DATA.filter(c => c.cat === cat);
+
+  const groups = {};
+  filtered.forEach(c => {
+    if (!groups[c.cat]) groups[c.cat] = [];
+    groups[c.cat].push(c);
+  });
+
+  const catLabels = {
+    energy:'⚡ Energy', metals:'🥇 Precious Metals',
+    mining:'⛏ Mining & Materials', agri:'🌾 Agriculture',
+    nuclear:'⚛ Uranium & Nuclear', clean:'🌱 Clean Energy'
+  };
+
+  let html = '';
+  Object.keys(groups).forEach(cat => {
+    html += `<div class="comm-section-title">${catLabels[cat] || cat}</div>`;
+    html += '<div class="comm-grid">';
+    groups[cat].forEach(c => {
+      const d = priceCache[c.sym];
+      const price = d ? d.price : '—';
+      const change = d ? d.change : '…';
+      const changeClass = d ? (d.up ? 'up' : 'down') : 'load';
+      html += `<div class="comm-card" style="--card-accent:${c.accent}">
+        <div class="comm-card-header">
+          <div>
+            <div class="comm-card-sym">${c.sym}</div>
+            <div class="comm-card-name">${c.name}</div>
+          </div>
+          <div class="comm-card-price-wrap">
+            <div class="comm-card-price">${price}</div>
+            <div class="comm-card-change ${changeClass}">${change}</div>
+          </div>
+        </div>
+        <div class="comm-drivers">
+          <div class="comm-drivers-label">Geopolitical Drivers</div>
+          ${c.drivers.map(d => `<div class="comm-driver-item"><div class="comm-driver-dot"></div><div class="comm-driver-text">${d}</div></div>`).join('')}
+        </div>
+        ${c.geoLinks.length ? `<div class="comm-geo-link">Linked to: ${c.geoLinks.join(' · ')}</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('comm-main-content').innerHTML = html;
+}
+
 </script>
 </body>
 </html>
