@@ -335,6 +335,161 @@
   .res-row:last-child { margin-bottom:0; }
   .res-arrow { color:var(--green); flex-shrink:0; font-size:12px; }
   .res-arrow.neg { color:var(--red); }
+
+  /* ── CORRELATIONS PAGE ─────────────────────────────────────── */
+  .corr-layout { display:flex; flex-direction:column; flex:1; overflow:hidden; }
+
+  .corr-controls {
+    padding:16px 24px; background:var(--surface); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-shrink:0;
+  }
+  .corr-title-main { font-size:15px; font-weight:800; color:var(--text); margin-bottom:3px; }
+  .corr-subtitle { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted); }
+  .corr-filters { display:flex; gap:6px; }
+  .corr-filter-btn {
+    padding:6px 14px; background:var(--surface2); border:1px solid var(--border2);
+    border-radius:4px; font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+    letter-spacing:0.08em; color:var(--text-muted); cursor:pointer; transition:all 0.15s;
+  }
+  .corr-filter-btn:hover { color:var(--text-dim); border-color:var(--border2); }
+  .corr-filter-btn.active { background:rgba(0,212,255,0.1); border-color:rgba(0,212,255,0.3); color:var(--accent); }
+
+  .corr-body { display:flex; flex:1; overflow:hidden; }
+
+  .corr-legend {
+    width:260px; flex-shrink:0; padding:20px; border-right:1px solid var(--border);
+    overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border2) transparent;
+  }
+  .corr-legend-title { font-family:'Space Mono',monospace; font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
+  .corr-legend-scale { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+  .corr-legend-item { display:flex; align-items:center; gap:8px; font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); }
+  .corr-swatch { width:14px; height:14px; border-radius:3px; flex-shrink:0; }
+  .corr-legend-note { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); line-height:1.6; border-top:1px solid var(--border); padding-top:12px; }
+
+  .corr-insight {
+    background:var(--surface2); border:1px solid var(--border2); border-radius:6px;
+    padding:12px; font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim);
+    line-height:1.7; min-height:80px;
+  }
+  .corr-insight.active { border-color:rgba(0,212,255,0.3); color:var(--text); }
+
+  .corr-matrix-wrap { flex:1; overflow:hidden; padding:20px; }
+  .corr-matrix-scroll { overflow:auto; height:100%; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+  .corr-matrix-scroll::-webkit-scrollbar { width:6px; height:6px; }
+  .corr-matrix-scroll::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+  .corr-table { border-collapse:separate; border-spacing:2px; }
+  .corr-col-header {
+    font-family:'Space Mono',monospace; font-size:9px; font-weight:700; color:var(--text-muted);
+    text-align:center; padding:4px 2px; writing-mode:vertical-rl; transform:rotate(180deg);
+    height:70px; vertical-align:bottom; white-space:nowrap;
+  }
+  .corr-row-header {
+    font-family:'Space Mono',monospace; font-size:9px; font-weight:700; color:var(--text-muted);
+    text-align:right; padding:4px 8px 4px 0; white-space:nowrap;
+  }
+  .corr-cell {
+    width:32px; height:32px; border-radius:4px; cursor:pointer;
+    transition:transform 0.1s, box-shadow 0.1s; position:relative;
+    font-family:'Space Mono',monospace; font-size:8px; font-weight:700;
+    text-align:center; vertical-align:middle; color:rgba(255,255,255,0.7);
+  }
+  .corr-cell:hover { transform:scale(1.15); box-shadow:0 0 0 2px var(--accent); z-index:10; }
+  .corr-cell.self { background:rgba(0,212,255,0.15); color:var(--accent); cursor:default; }
+  .corr-cell.self:hover { transform:none; box-shadow:none; }
+
+  /* ── MACRO EVENTS PAGE ─────────────────────────────────────── */
+  .macro-layout { display:flex; flex:1; overflow:hidden; }
+
+  .macro-sidebar {
+    width:260px; flex-shrink:0; background:var(--surface);
+    border-right:1px solid var(--border); overflow-y:auto;
+    scrollbar-width:thin; scrollbar-color:var(--border2) transparent;
+  }
+  .macro-sidebar-header {
+    padding:16px 18px 12px; border-bottom:1px solid var(--border); position:sticky; top:0;
+    background:var(--surface); z-index:10;
+  }
+  .macro-sidebar-title { font-size:13px; font-weight:800; color:var(--text); margin-bottom:3px; }
+  .macro-sidebar-sub { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); }
+
+  .macro-event-btn {
+    padding:14px 18px; border-bottom:1px solid var(--border); cursor:pointer;
+    transition:background 0.15s; position:relative; border-left:3px solid transparent;
+  }
+  .macro-event-btn:hover { background:var(--surface2); }
+  .macro-event-btn.active { background:rgba(0,212,255,0.05); border-left-color:var(--accent); }
+  .macro-event-btn-name { font-size:12px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .macro-event-btn-meta { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); display:flex; gap:8px; }
+  .macro-event-btn-freq { color:var(--accent); }
+
+  .macro-main {
+    flex:1; overflow-y:auto; padding:28px;
+    scrollbar-width:thin; scrollbar-color:var(--border2) transparent;
+  }
+
+  .macro-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:12px; opacity:0.4; }
+  .macro-empty-icon { font-size:48px; }
+  .macro-empty-title { font-size:18px; font-weight:800; color:var(--text-dim); }
+  .macro-empty-sub { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-muted); }
+
+  /* Event header */
+  .macro-header { margin-bottom:24px; }
+  .macro-header-tag { font-family:'Space Mono',monospace; font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+  .macro-header-title { font-size:22px; font-weight:800; color:var(--text); margin-bottom:6px; }
+  .macro-header-desc { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim); line-height:1.7; max-width:680px; }
+  .macro-header-meta { display:flex; gap:16px; margin-top:12px; }
+  .macro-meta-pill { font-family:'Space Mono',monospace; font-size:9px; padding:3px 10px; border-radius:4px; border:1px solid var(--border2); color:var(--text-muted); }
+
+  /* Scenarios */
+  .macro-scenarios-title { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .macro-scenarios-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .macro-scenario-card {
+    border:1px solid var(--border); border-radius:8px; margin-bottom:16px; overflow:hidden;
+    transition:border-color 0.15s;
+  }
+  .macro-scenario-card:hover { border-color:var(--border2); }
+
+  .macro-scenario-header {
+    padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; user-select:none;
+  }
+  .macro-scenario-header-left { display:flex; align-items:center; gap:12px; }
+  .scenario-letter {
+    width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:11px; font-weight:700; flex-shrink:0;
+  }
+  .scenario-a { background:rgba(255,71,87,0.12); color:var(--red); border:1px solid rgba(255,71,87,0.3); }
+  .scenario-b { background:rgba(255,211,42,0.12); color:var(--yellow); border:1px solid rgba(255,211,42,0.3); }
+  .scenario-c { background:rgba(0,230,118,0.12); color:var(--green); border:1px solid rgba(0,230,118,0.3); }
+
+  .scenario-name { font-size:13px; font-weight:700; color:var(--text); }
+  .scenario-desc { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted); margin-top:2px; }
+  .scenario-prob {
+    font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+    padding:3px 10px; border-radius:4px; background:var(--surface2); color:var(--text-dim);
+  }
+
+  .macro-scenario-body { padding:0 18px 16px; border-top:1px solid var(--border); background:rgba(0,0,0,0.15); }
+
+  .scenario-impact-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:14px; }
+
+  .scenario-impact-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 14px;
+  }
+  .sic-sym { font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--text); }
+  .sic-name { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); margin-top:2px; margin-bottom:10px; }
+  .sic-move { font-family:'Space Mono',monospace; font-size:16px; font-weight:700; margin-bottom:2px; }
+  .sic-move.pos { color:var(--green); }
+  .sic-move.neg { color:var(--red); }
+  .sic-move.neu { color:var(--text-muted); }
+  .sic-window { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); }
+  .sic-conf { font-family:'Space Mono',monospace; font-size:9px; margin-top:6px; padding-top:6px; border-top:1px solid var(--border); }
+
+  .scenario-context { margin-top:14px; font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); line-height:1.8; padding:12px 14px; background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.1); border-radius:6px; }
+
+  .macro-disclaimer { margin-top:24px; font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); padding:10px 14px; border:1px solid var(--border); border-radius:4px; line-height:1.7; }
 </style>
 </head>
 <body>
@@ -433,19 +588,74 @@
 
 <!-- ── MACRO EVENTS PAGE ──────────────────────────────────────── -->
 <div class="page" id="page-macro">
-  <div class="page-placeholder">
-    <div class="placeholder-icon">📊</div>
-    <div class="placeholder-title">Macro Events</div>
-    <div class="placeholder-sub">Central bank decisions · Economic data · Policy shifts — Coming soon</div>
+  <div class="macro-layout">
+
+    <!-- Sidebar -->
+    <div class="macro-sidebar">
+      <div class="macro-sidebar-header">
+        <div class="macro-sidebar-title">Macro Calendar</div>
+        <div class="macro-sidebar-sub">Select event to see scenario analysis</div>
+      </div>
+      <div id="macro-event-list"></div>
+    </div>
+
+    <!-- Main -->
+    <div class="macro-main" id="macro-main">
+      <div class="macro-empty">
+        <div class="macro-empty-icon">📊</div>
+        <div class="macro-empty-title">Select a Macro Event</div>
+        <div class="macro-empty-sub">See how each possible outcome historically moved key assets</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- ── CORRELATIONS PAGE ──────────────────────────────────────── -->
 <div class="page" id="page-correlations">
-  <div class="page-placeholder">
-    <div class="placeholder-icon">🔗</div>
-    <div class="placeholder-title">Correlations</div>
-    <div class="placeholder-sub">Cross-asset correlation matrix — Coming soon</div>
+  <div class="corr-layout">
+
+    <!-- Controls -->
+    <div class="corr-controls">
+      <div class="corr-controls-left">
+        <div class="corr-title-main">Cross-Asset Correlation Matrix</div>
+        <div class="corr-subtitle">Based on analyst research · 12-month rolling window · Geopolitical stress periods</div>
+      </div>
+      <div class="corr-filters">
+        <button class="corr-filter-btn active" onclick="setCorrFilter('all')">All Assets</button>
+        <button class="corr-filter-btn" onclick="setCorrFilter('energy')">Energy</button>
+        <button class="corr-filter-btn" onclick="setCorrFilter('equity')">Equity</button>
+        <button class="corr-filter-btn" onclick="setCorrFilter('metals')">Metals</button>
+        <button class="corr-filter-btn" onclick="setCorrFilter('macro')">Macro</button>
+      </div>
+    </div>
+
+    <!-- Matrix + Legend -->
+    <div class="corr-body">
+      <div class="corr-legend">
+        <div class="corr-legend-title">CORRELATION STRENGTH</div>
+        <div class="corr-legend-scale">
+          <div class="corr-legend-item"><div class="corr-swatch" style="background:#00e676"></div><span>Strong Positive (0.7–1.0)</span></div>
+          <div class="corr-legend-item"><div class="corr-swatch" style="background:#69db92"></div><span>Moderate Positive (0.4–0.7)</span></div>
+          <div class="corr-legend-item"><div class="corr-swatch" style="background:#1e2a3a"></div><span>Neutral (−0.4–0.4)</span></div>
+          <div class="corr-legend-item"><div class="corr-swatch" style="background:#ff6b6b"></div><span>Moderate Negative (−0.7–−0.4)</span></div>
+          <div class="corr-legend-item"><div class="corr-swatch" style="background:#ff4757"></div><span>Strong Negative (−1.0–−0.7)</span></div>
+        </div>
+        <div class="corr-legend-note">⚠ Correlations reflect geopolitical stress periods. Normal market conditions may differ. Not investment advice.</div>
+
+        <div style="margin-top:24px">
+          <div class="corr-legend-title" style="margin-bottom:12px">KEY INSIGHTS</div>
+          <div class="corr-insight" id="corr-insight-box">Click any cell to see insight</div>
+        </div>
+      </div>
+
+      <div class="corr-matrix-wrap">
+        <div class="corr-matrix-scroll">
+          <div id="corr-matrix-container"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1350,6 +1560,530 @@ loadAllPrices();
 // Refresh prices every 60 seconds
 setInterval(loadAllPrices, 60000);
 
+
+
+// ─── MACRO EVENTS DATA ───────────────────────────────────────────────────────
+const MACRO_EVENTS = [
+  {
+    id:'fed',
+    name:'Fed Rate Decision',
+    category:'Central Bank',
+    frequency:'8x per year (FOMC)',
+    nextEvent:'Mar 19, 2025',
+    description:'The Federal Open Market Committee (FOMC) sets the federal funds rate. This is the single most market-moving event globally — affecting all asset classes via the risk-free rate, dollar strength, and credit conditions.',
+    watchAssets:['SPY','IEF','GLD','FXE','USO'],
+    scenarios:[
+      {
+        letter:'A', type:'a',
+        name:'Hawkish Surprise — Rate Hike or No Cut When Cut Expected',
+        desc:'Fed raises rates or signals fewer cuts than market pricing',
+        historicalProb:'18% of meetings since 2022',
+        context:'Hawkish surprises historically trigger immediate risk-off. The 2022 hiking cycle is the clearest recent example — SPY fell 18% in the 6 months following the first surprise 75bps hike. Dollar strength (DXY +3–5%) compresses EM assets and commodities priced in USD. Gold paradoxically sometimes rises if hike signals recession fear.',
+        impacts:[
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'-3.2%', pos:false, window:'5-day', conf:'HIGH (12/14 episodes)' },
+          { sym:'IEF',  name:'10Y Treasury',   move:'-2.8%', pos:false, window:'5-day', conf:'HIGH (11/14 episodes)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'-1.4%', pos:false, window:'5-day', conf:'MODERATE (8/14 episodes)' },
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'-1.8%', pos:false, window:'5-day', conf:'HIGH (12/14 episodes)' },
+          { sym:'USO',  name:'WTI Oil ETF',     move:'-2.1%', pos:false, window:'5-day', conf:'MODERATE (9/14 episodes)' },
+          { sym:'UNG',  name:'Nat Gas ETF',     move:'-0.8%', pos:false, window:'5-day', conf:'LOW (6/14 episodes)' },
+        ]
+      },
+      {
+        letter:'B', type:'b',
+        name:'In-Line Decision — Market Expectation Met',
+        desc:'Fed does exactly what futures market priced in',
+        historicalProb:'54% of meetings',
+        context:'In-line decisions historically produce muted immediate reactions — markets move in the press conference tone, not the decision itself. Jerome Powell's language around "data dependency" and "higher for longer" has been the dominant volatility driver since 2022. Watch the dot plot revisions for longer-term signal.',
+        impacts:[
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'+0.4%', pos:true,  window:'5-day', conf:'LOW (varied)' },
+          { sym:'IEF',  name:'10Y Treasury',   move:'+0.2%', pos:true,  window:'5-day', conf:'LOW (varied)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'+0.3%', pos:true,  window:'5-day', conf:'LOW (varied)' },
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'±0.3%', pos:true,  window:'5-day', conf:'NEUTRAL' },
+          { sym:'USO',  name:'WTI Oil ETF',     move:'±0.5%', pos:true,  window:'5-day', conf:'LOW (dominated by supply)' },
+        ]
+      },
+      {
+        letter:'C', type:'c',
+        name:'Dovish Surprise — Rate Cut or Pivot Signal',
+        desc:'Fed cuts or signals more cuts than expected',
+        historicalProb:'28% of meetings since 2022',
+        context:'Dovish surprises historically trigger the strongest and most sustained market moves. The 2019 pivot and 2023 dovish pivot produced 15–20% SPY rallies over the following 3 months. Gold historically benefits most from dovish pivots — real rates fall, opportunity cost of holding gold drops. EM assets and commodities see relief rally as dollar weakens.',
+        impacts:[
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'+2.8%', pos:true,  window:'5-day', conf:'HIGH (11/13 episodes)' },
+          { sym:'IEF',  name:'10Y Treasury',   move:'+2.2%', pos:true,  window:'5-day', conf:'HIGH (12/13 episodes)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'+2.6%', pos:true,  window:'5-day', conf:'HIGH (11/13 episodes)' },
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'+1.4%', pos:true,  window:'5-day', conf:'MODERATE (9/13 episodes)' },
+          { sym:'USO',  name:'WTI Oil ETF',     move:'+1.8%', pos:true,  window:'5-day', conf:'MODERATE (8/13 episodes)' },
+          { sym:'SOXX', name:'Semis ETF',       move:'+3.4%', pos:true,  window:'5-day', conf:'HIGH (11/13 episodes)' },
+        ]
+      },
+    ]
+  },
+  {
+    id:'cpi',
+    name:'US CPI Inflation Print',
+    category:'Economic Data',
+    frequency:'Monthly (2nd/3rd week)',
+    nextEvent:'Mar 12, 2025',
+    description:'The Consumer Price Index is the primary measure of US inflation. Since 2022, CPI prints have become the most volatility-inducing monthly data releases — because inflation directly determines Fed policy, which drives all asset prices.',
+    watchAssets:['SPY','IEF','GLD','FXE','USO'],
+    scenarios:[
+      {
+        letter:'A', type:'a',
+        name:'Hot Print — Above Consensus Expectations',
+        desc:'CPI comes in higher than economist consensus',
+        historicalProb:'~40% of prints in 2022–2024',
+        context:'Hot CPI prints force the market to reprice rate cut expectations higher, acting exactly like a hawkish Fed surprise. The October 2022 CPI miss triggered a 2.4% intraday S&P drop — the largest single-day reaction to CPI in decades. Bond yields spike immediately. Gold often falls despite being an "inflation hedge" — the rate rise effect dominates.',
+        impacts:[
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'-2.1%', pos:false, window:'1-day', conf:'HIGH (14/18 episodes)' },
+          { sym:'IEF',  name:'10Y Treasury',   move:'-1.8%', pos:false, window:'1-day', conf:'HIGH (15/18 episodes)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'-1.2%', pos:false, window:'1-day', conf:'MODERATE (10/18 episodes)' },
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'-0.9%', pos:false, window:'1-day', conf:'HIGH (13/18 episodes)' },
+          { sym:'SOXX', name:'Semis ETF',       move:'-2.8%', pos:false, window:'1-day', conf:'HIGH (14/18 episodes)' },
+        ]
+      },
+      {
+        letter:'B', type:'b',
+        name:'In-Line Print — Meets Consensus',
+        desc:'CPI matches economist forecast within 0.1%',
+        historicalProb:'~25% of prints',
+        context:'In-line CPI prints produce the smallest market reactions. The "relief rally" is often seen in bonds and growth stocks as the rate path uncertainty resolves without negative surprise. Markets quickly shift focus to next catalyst.',
+        impacts:[
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'+0.6%', pos:true,  window:'1-day', conf:'LOW (mixed)' },
+          { sym:'IEF',  name:'10Y Treasury',   move:'+0.4%', pos:true,  window:'1-day', conf:'LOW (mixed)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'+0.3%', pos:true,  window:'1-day', conf:'LOW (mixed)' },
+        ]
+      },
+      {
+        letter:'C', type:'c',
+        name:'Cool Print — Below Consensus Expectations',
+        desc:'CPI comes in lower than expected — disinflation signal',
+        historicalProb:'~35% of prints in 2023–2024',
+        context:'Cool CPI prints are the strongest positive catalyst in the current macro regime. July 2023 CPI miss triggered a 1-day SPY +1.8% move and a 3-week rally in bonds. The mechanism: lower inflation → fewer rate hikes needed → lower discount rate → all risk assets reprice higher. Gold benefits most on a sustained basis as real rates decline.',
+        impacts:[
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'+1.9%', pos:true,  window:'1-day', conf:'HIGH (13/16 episodes)' },
+          { sym:'IEF',  name:'10Y Treasury',   move:'+1.6%', pos:true,  window:'1-day', conf:'HIGH (14/16 episodes)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'+1.4%', pos:true,  window:'1-day', conf:'HIGH (12/16 episodes)' },
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'+0.8%', pos:true,  window:'1-day', conf:'MODERATE (10/16 episodes)' },
+          { sym:'SOXX', name:'Semis ETF',       move:'+2.6%', pos:true,  window:'1-day', conf:'HIGH (13/16 episodes)' },
+        ]
+      },
+    ]
+  },
+  {
+    id:'nfp',
+    name:'Non-Farm Payrolls (NFP)',
+    category:'Economic Data',
+    frequency:'Monthly (first Friday)',
+    nextEvent:'Apr 4, 2025',
+    description:'NFP measures US job creation — the most important labor market signal for the Fed. Since the Fed adopted dual mandate (inflation + employment) as policy drivers, strong jobs data has paradoxically become bearish for equities in a rate-sensitive market.',
+    watchAssets:['SPY','IEF','GLD','FXE'],
+    scenarios:[
+      {
+        letter:'A', type:'a',
+        name:'Strong Print — Jobs Beat Expectations',
+        desc:'Payrolls significantly above consensus (>50k beat)',
+        historicalProb:'~45% of prints',
+        context:'In the post-2022 rate-sensitive regime, strong NFP is bearish for bonds and ambiguous for stocks. Strong jobs = Fed has room to stay higher for longer = rates stay elevated = growth stocks underperform, value outperforms. The August 2023 jobs beat sent 10Y yields to 4.3% in 48 hours.',
+        impacts:[
+          { sym:'IEF',  name:'10Y Treasury',   move:'-1.4%', pos:false, window:'2-day', conf:'HIGH (13/16 episodes)' },
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'-0.8%', pos:false, window:'2-day', conf:'MODERATE (9/16 episodes)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'-0.9%', pos:false, window:'2-day', conf:'MODERATE (9/16 episodes)' },
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'-0.7%', pos:false, window:'2-day', conf:'MODERATE (9/16 episodes)' },
+        ]
+      },
+      {
+        letter:'B', type:'b',
+        name:'In-Line Print — Meets Consensus',
+        desc:'Payrolls within ±30k of forecast',
+        historicalProb:'~30% of prints',
+        context:'In-line NFP produces minimal market movement. The market quickly pivots to the wage growth and unemployment rate components, which are increasingly important for Fed signaling around the labor market cooling narrative.',
+        impacts:[
+          { sym:'IEF',  name:'10Y Treasury',   move:'±0.3%', pos:true,  window:'2-day', conf:'LOW' },
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'±0.4%', pos:true,  window:'2-day', conf:'LOW' },
+        ]
+      },
+      {
+        letter:'C', type:'c',
+        name:'Weak Print — Jobs Miss Expectations',
+        desc:'Payrolls significantly below consensus (>50k miss)',
+        historicalProb:'~25% of prints',
+        context:'Weak NFP is the most complex scenario. Initial reaction is bonds rally (rate cut expectations rise). Equities are mixed — growth stocks benefit from lower rate expectations, but the market must decide if it is a "soft landing" signal (bullish) or recession signal (bearish). Gold historically benefits most from weak NFP as real rates decline.',
+        impacts:[
+          { sym:'IEF',  name:'10Y Treasury',   move:'+1.8%', pos:true,  window:'2-day', conf:'HIGH (12/14 episodes)' },
+          { sym:'GLD',  name:'Gold ETF',        move:'+1.2%', pos:true,  window:'2-day', conf:'HIGH (11/14 episodes)' },
+          { sym:'SPY',  name:'S&P 500 ETF',    move:'+0.4%', pos:true,  window:'2-day', conf:'LOW (split reaction)' },
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'+0.6%', pos:true,  window:'2-day', conf:'MODERATE (9/14 episodes)' },
+        ]
+      },
+    ]
+  },
+  {
+    id:'china-gdp',
+    name:'China GDP Release',
+    category:'Economic Data',
+    frequency:'Quarterly',
+    nextEvent:'Apr 16, 2025',
+    description:'China GDP is the primary driver of global commodity demand expectations. Given China's role as the world's largest consumer of iron ore, copper, and soybeans, its growth trajectory directly determines the outlook for miners, EM equities, and industrial metals.',
+    watchAssets:['FXI','BHP','VALE','SOYB','USO'],
+    scenarios:[
+      {
+        letter:'A', type:'a',
+        name:'Miss — Below Government Target (below 4.5%)',
+        desc:'GDP growth below official 5% target by meaningful margin',
+        historicalProb:'~30% of releases since 2022',
+        context:'Chinese GDP misses trigger immediate selling in commodity-exposed equities globally. BHP and VALE historically drop 5–10% within 3 days. The property sector linkage is key — weak GDP often reflects continued property sector drag. AUD (Australian Dollar) is historically the cleanest FX expression of China GDP risk.',
+        impacts:[
+          { sym:'FXI',  name:'China ETF',       move:'-4.2%', pos:false, window:'3-day', conf:'HIGH (11/13 episodes)' },
+          { sym:'BHP',  name:'BHP Group',        move:'-5.8%', pos:false, window:'3-day', conf:'HIGH (10/13 episodes)' },
+          { sym:'VALE', name:'Vale SA',           move:'-6.4%', pos:false, window:'3-day', conf:'HIGH (11/13 episodes)' },
+          { sym:'SOYB', name:'Soybeans ETF',     move:'-2.1%', pos:false, window:'3-day', conf:'MODERATE (8/13 episodes)' },
+          { sym:'USO',  name:'WTI Oil ETF',      move:'-2.8%', pos:false, window:'3-day', conf:'MODERATE (8/13 episodes)' },
+        ]
+      },
+      {
+        letter:'B', type:'b',
+        name:'In-Line — Meets 5% Government Target',
+        desc:'GDP growth at or near official 5% target',
+        historicalProb:'~40% of releases',
+        context:'In-line China GDP produces moderate positive reactions in commodity equities. Markets quickly focus on whether the growth composition (property vs manufacturing vs consumption) signals sustainability.',
+        impacts:[
+          { sym:'FXI',  name:'China ETF',       move:'+1.4%', pos:true,  window:'3-day', conf:'MODERATE' },
+          { sym:'BHP',  name:'BHP Group',        move:'+1.8%', pos:true,  window:'3-day', conf:'MODERATE' },
+          { sym:'VALE', name:'Vale SA',           move:'+2.1%', pos:true,  window:'3-day', conf:'MODERATE' },
+        ]
+      },
+      {
+        letter:'C', type:'c',
+        name:'Beat — Above Target with Stimulus Signals',
+        desc:'GDP above 5.5% or accompanied by major stimulus announcement',
+        historicalProb:'~30% of releases',
+        context:'China GDP beats with accompanying stimulus create the strongest cross-asset reactions. Iron ore historically jumps 8–15% in the month following credible stimulus announcements. The October 2023 and September 2024 stimulus packages are the clearest recent examples — both triggered 15–20% rallies in China-exposed equities.',
+        impacts:[
+          { sym:'FXI',  name:'China ETF',       move:'+6.8%', pos:true,  window:'5-day', conf:'HIGH (9/11 episodes)' },
+          { sym:'BHP',  name:'BHP Group',        move:'+7.2%', pos:true,  window:'5-day', conf:'HIGH (9/11 episodes)' },
+          { sym:'VALE', name:'Vale SA',           move:'+8.6%', pos:true,  window:'5-day', conf:'HIGH (10/11 episodes)' },
+          { sym:'SOYB', name:'Soybeans ETF',     move:'+3.4%', pos:true,  window:'5-day', conf:'MODERATE (7/11 episodes)' },
+          { sym:'USO',  name:'WTI Oil ETF',      move:'+4.1%', pos:true,  window:'5-day', conf:'MODERATE (7/11 episodes)' },
+        ]
+      },
+    ]
+  },
+  {
+    id:'ecb',
+    name:'ECB Rate Decision',
+    category:'Central Bank',
+    frequency:'8x per year',
+    nextEvent:'Apr 17, 2025',
+    description:'The European Central Bank sets rates for the Eurozone. ECB decisions primarily affect EUR/USD, European equities, and European bonds — but spillover to global risk sentiment is significant given the Eurozone's size (second largest economy globally).',
+    watchAssets:['FXE','EWG','IEF','GLD'],
+    scenarios:[
+      {
+        letter:'A', type:'a',
+        name:'Hawkish Surprise — Hike or Fewer Cuts',
+        desc:'ECB raises rates or signals rate path higher than expected',
+        historicalProb:'~20% of meetings in current cycle',
+        context:'ECB hawkish surprises strengthen EUR sharply — FXE historically moves +1.5–2.5% on the day. German exporters (EWG) typically fall as EUR strength compresses margins. The 2022 ECB pivot to hiking after years of negative rates was the largest hawkish surprise in ECB history and triggered a 3% EUR rally in one session.',
+        impacts:[
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'+1.8%', pos:true,  window:'1-day', conf:'HIGH (10/12 episodes)' },
+          { sym:'EWG',  name:'Germany ETF',      move:'-1.4%', pos:false, window:'1-day', conf:'MODERATE (8/12 episodes)' },
+          { sym:'IEF',  name:'10Y Treasury',    move:'-0.6%', pos:false, window:'1-day', conf:'LOW (spillover)' },
+          { sym:'GLD',  name:'Gold ETF',         move:'+0.8%', pos:true,  window:'1-day', conf:'LOW (6/12 episodes)' },
+        ]
+      },
+      {
+        letter:'B', type:'b',
+        name:'In-Line — Expected Decision',
+        desc:'ECB delivers what was fully priced by markets',
+        historicalProb:'~45% of meetings',
+        context:'In-line ECB decisions produce minimal EUR moves. Lagarde press conference tone is the dominant driver — forward guidance language around "data dependent" and inflation trajectory.',
+        impacts:[
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'±0.3%', pos:true,  window:'1-day', conf:'LOW' },
+          { sym:'EWG',  name:'Germany ETF',      move:'±0.5%', pos:true,  window:'1-day', conf:'LOW' },
+        ]
+      },
+      {
+        letter:'C', type:'c',
+        name:'Dovish Surprise — Cut or More Cuts Signaled',
+        desc:'ECB cuts rates or signals more aggressive easing',
+        historicalProb:'~35% of meetings in 2024',
+        context:'ECB dovish surprises weaken EUR (FXE falls) but historically boost German equities as export competitiveness improves. The June 2024 ECB first cut saw EWG rally 0.8% despite EUR weakness — the growth signal dominated the FX headwind. European bank stocks historically underperform on rate cuts.',
+        impacts:[
+          { sym:'FXE',  name:'EUR/USD ETF',     move:'-1.4%', pos:false, window:'1-day', conf:'HIGH (11/13 episodes)' },
+          { sym:'EWG',  name:'Germany ETF',      move:'+1.6%', pos:true,  window:'1-day', conf:'MODERATE (8/13 episodes)' },
+          { sym:'IEF',  name:'10Y Treasury',    move:'+0.4%', pos:true,  window:'1-day', conf:'LOW' },
+          { sym:'GLD',  name:'Gold ETF',         move:'+0.6%', pos:true,  window:'1-day', conf:'LOW' },
+        ]
+      },
+    ]
+  },
+  {
+    id:'opec',
+    name:'OPEC+ Production Meeting',
+    category:'Commodities Policy',
+    frequency:'Bi-annual + emergency',
+    nextEvent:'Jun 1, 2025',
+    description:'OPEC+ production decisions are the primary supply-side driver of oil prices. Saudi Arabia as swing producer can unilaterally move prices through voluntary cut announcements. The cohesion of the OPEC+ coalition is increasingly important as non-OPEC supply (US Permian) grows.',
+    watchAssets:['USO','BNO','UNG','XOM','LMT'],
+    scenarios:[
+      {
+        letter:'A', type:'a',
+        name:'Production Cuts — Supply Reduction',
+        desc:'OPEC+ announces new cuts or extends existing cuts',
+        historicalProb:'~40% of meetings since 2022',
+        context:'OPEC+ cut announcements historically produce 3–8% WTI price spikes in the week following. However, the effect has been diminishing — markets increasingly discount compliance risk (UAE, Iraq, Russia historically cheat on quotas). The April 2023 surprise cut of 1.16M bpd produced a $6/barrel spike then fully reversed within 60 days.',
+        impacts:[
+          { sym:'USO',  name:'WTI Oil ETF',     move:'+5.4%', pos:true,  window:'5-day', conf:'HIGH (11/13 episodes)' },
+          { sym:'BNO',  name:'Brent ETF',        move:'+5.8%', pos:true,  window:'5-day', conf:'HIGH (11/13 episodes)' },
+          { sym:'XOM',  name:'ExxonMobil',       move:'+3.2%', pos:true,  window:'5-day', conf:'HIGH (10/13 episodes)' },
+          { sym:'UNG',  name:'Nat Gas ETF',      move:'+1.8%', pos:true,  window:'5-day', conf:'LOW (energy complex)' },
+          { sym:'SPY',  name:'S&P 500 ETF',      move:'-0.8%', pos:false, window:'5-day', conf:'MODERATE (oil tax effect)' },
+        ]
+      },
+      {
+        letter:'B', type:'b',
+        name:'Status Quo — Current Levels Maintained',
+        desc:'OPEC+ rolls over existing production policy',
+        historicalProb:'~35% of meetings',
+        context:'Status quo decisions produce muted oil market reactions. The focus shifts immediately to demand signals from China and the trajectory of US shale production. IEA and EIA monthly reports become the dominant driver until the next OPEC meeting.',
+        impacts:[
+          { sym:'USO',  name:'WTI Oil ETF',     move:'±0.8%', pos:true,  window:'5-day', conf:'LOW' },
+          { sym:'BNO',  name:'Brent ETF',        move:'±0.9%', pos:true,  window:'5-day', conf:'LOW' },
+        ]
+      },
+      {
+        letter:'C', type:'c',
+        name:'Production Increase — Supply Boost',
+        desc:'OPEC+ announces production increase or unwind of cuts',
+        historicalProb:'~25% of meetings',
+        context:'OPEC+ production increases are historically bearish for oil but have complex second-order effects. Airlines, consumer discretionary, and chemical companies benefit from lower input costs. The June 2023 OPEC+ increase announcement sent Brent down $4 in one session. Saudi Arabia's fiscal breakeven (~$80 Brent) historically caps how far and fast they will increase production.',
+        impacts:[
+          { sym:'USO',  name:'WTI Oil ETF',     move:'-4.8%', pos:false, window:'5-day', conf:'HIGH (8/10 episodes)' },
+          { sym:'BNO',  name:'Brent ETF',        move:'-5.1%', pos:false, window:'5-day', conf:'HIGH (8/10 episodes)' },
+          { sym:'XOM',  name:'ExxonMobil',       move:'-2.8%', pos:false, window:'5-day', conf:'MODERATE (7/10 episodes)' },
+          { sym:'SPY',  name:'S&P 500 ETF',      move:'+0.6%', pos:true,  window:'5-day', conf:'LOW (consumer benefit)' },
+          { sym:'ICLN', name:'Clean Energy ETF', move:'+1.2%', pos:true,  window:'5-day', conf:'LOW (cheaper fossil = less pressure)' },
+        ]
+      },
+    ]
+  },
+];
+
+// ─── RENDER MACRO ─────────────────────────────────────────────────────────────
+let selectedMacroId = null;
+
+function initMacro() {
+  const list = document.getElementById('macro-event-list');
+  list.innerHTML = MACRO_EVENTS.map(ev => `
+    <div class="macro-event-btn" id="mbtn-${ev.id}" onclick="showMacroEvent('${ev.id}')">
+      <div class="macro-event-btn-name">${ev.name}</div>
+      <div class="macro-event-btn-meta">
+        <span class="macro-event-btn-freq">${ev.category}</span>
+        <span>${ev.frequency}</span>
+      </div>
+    </div>`).join('');
+}
+
+function showMacroEvent(id) {
+  selectedMacroId = id;
+  const ev = MACRO_EVENTS.find(e => e.id === id);
+
+  document.querySelectorAll('.macro-event-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mbtn-' + id)?.classList.add('active');
+
+  const scenariosHtml = ev.scenarios.map(s => `
+    <div class="macro-scenario-card">
+      <div class="macro-scenario-header">
+        <div class="macro-scenario-header-left">
+          <div class="scenario-letter scenario-${s.type}">${s.letter}</div>
+          <div>
+            <div class="scenario-name">${s.name}</div>
+            <div class="scenario-desc">${s.desc}</div>
+          </div>
+        </div>
+        <div class="scenario-prob">${s.historicalProb}</div>
+      </div>
+      <div class="macro-scenario-body">
+        <div class="scenario-impact-grid">
+          ${s.impacts.map(imp => `
+            <div class="scenario-impact-card">
+              <div class="sic-sym">${imp.sym}</div>
+              <div class="sic-name">${imp.name}</div>
+              <div class="sic-move ${imp.pos?'pos':'neg'}">${imp.move} avg</div>
+              <div class="sic-window">${imp.window} window</div>
+              <div class="sic-conf" style="color:var(--text-muted)">${imp.conf}</div>
+            </div>`).join('')}
+        </div>
+        <div class="scenario-context">${s.context}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('macro-main').innerHTML = `
+    <div class="macro-header">
+      <div class="macro-header-tag">${ev.category} · ${ev.frequency}</div>
+      <div class="macro-header-title">${ev.name}</div>
+      <div class="macro-header-desc">${ev.description}</div>
+      <div class="macro-header-meta">
+        <div class="macro-meta-pill">Next: ${ev.nextEvent}</div>
+        <div class="macro-meta-pill">Watch: ${ev.watchAssets.join(' · ')}</div>
+      </div>
+    </div>
+
+    <div class="macro-scenarios-title">Scenario Analysis — Historical Asset Reactions</div>
+    ${scenariosHtml}
+
+    <div class="macro-disclaimer">
+      ⚠ All scenario data reflects historical patterns from comparable episodes. Figures represent averages across multiple events and will vary significantly based on market context, positioning, and concurrent macro factors. This is not a forecast or investment recommendation.
+    </div>`;
+}
+
+// ─── CORRELATION DATA ─────────────────────────────────────────────────────────
+// Analyst-estimated correlations during geopolitical stress periods
+// Scale: -1.0 to 1.0
+
+const CORR_ASSETS = [
+  { sym:'USO',  label:'WTI Oil',    cat:'energy'  },
+  { sym:'BNO',  label:'Brent',      cat:'energy'  },
+  { sym:'UNG',  label:'Nat Gas',    cat:'energy'  },
+  { sym:'GLD',  label:'Gold',       cat:'metals'  },
+  { sym:'GDX',  label:'Gold Mine',  cat:'metals'  },
+  { sym:'PPLT', label:'Platinum',   cat:'metals'  },
+  { sym:'WEAT', label:'Wheat',      cat:'macro'   },
+  { sym:'SOYB', label:'Soybeans',   cat:'macro'   },
+  { sym:'SPY',  label:'S&P 500',    cat:'equity'  },
+  { sym:'EWG',  label:'Germany',    cat:'equity'  },
+  { sym:'EWJ',  label:'Japan',      cat:'equity'  },
+  { sym:'FXI',  label:'China',      cat:'equity'  },
+  { sym:'IEF',  label:'10Y UST',    cat:'macro'   },
+  { sym:'FXE',  label:'EUR/USD',    cat:'macro'   },
+  { sym:'LMT',  label:'Defense',    cat:'equity'  },
+  { sym:'SOXX', label:'Semis',      cat:'equity'  },
+  { sym:'CCJ',  label:'Uranium',    cat:'metals'  },
+  { sym:'ICLN', label:'CleanEnrg',  cat:'energy'  },
+];
+
+// Upper triangle only — matrix is symmetric
+// Format: [i][j] = correlation between asset i and asset j
+const CORR_MATRIX = [
+//USO  BNO  UNG  GLD  GDX  PPLT WEAT SOYB SPY  EWG  EWJ  FXI  IEF  FXE  LMT  SOXX CCJ  ICLN
+[ 1.0, 0.94,0.62,0.48,0.41,0.33,0.28,0.18,-0.22,-0.05,-0.18,-0.31,0.12,-0.28,0.35,-0.28,0.22,0.41],
+[ 0.94,1.0, 0.58,0.51,0.44,0.36,0.26,0.16,-0.20,-0.04,-0.16,-0.29,0.11,-0.26,0.37,-0.26,0.21,0.39],
+[ 0.62,0.58,1.0, 0.38,0.31,0.24,0.42,0.22,-0.18,-0.08,-0.14,-0.22,0.18,-0.31,0.28,-0.20,0.18,0.55],
+[ 0.48,0.51,0.38,1.0, 0.88,0.72,0.31,0.24,-0.41,-0.18,-0.38,-0.28,0.54,-0.12,0.29,-0.35,0.44,0.28],
+[ 0.41,0.44,0.31,0.88,1.0, 0.68,0.28,0.21,-0.38,-0.16,-0.34,-0.25,0.48,-0.10,0.26,-0.31,0.40,0.25],
+[ 0.33,0.36,0.24,0.72,0.68,1.0, 0.18,0.14,-0.28,-0.09,-0.22,-0.18,0.38,-0.08,0.18,-0.24,0.35,0.19],
+[ 0.28,0.26,0.42,0.31,0.28,0.18,1.0, 0.72,-0.24,-0.12,-0.20,-0.35,0.14,-0.22,0.12,-0.18,0.14,0.16],
+[ 0.18,0.16,0.22,0.24,0.21,0.14,0.72,1.0, -0.18,-0.08,-0.14,-0.28,0.10,-0.16,0.08,-0.12,0.10,0.12],
+[-0.22,-0.20,-0.18,-0.41,-0.38,-0.28,-0.24,-0.18,1.0, 0.78,0.72,0.58,-0.62,0.44,-0.18,0.82,-0.28,-0.38],
+[-0.05,-0.04,-0.08,-0.18,-0.16,-0.09,-0.12,-0.08,0.78,1.0, 0.65,0.51,-0.52,0.68,-0.12,0.62,-0.22,-0.28],
+[-0.18,-0.16,-0.14,-0.38,-0.34,-0.22,-0.20,-0.14,0.72,0.65,1.0, 0.54,-0.58,0.38,-0.15,0.58,-0.18,-0.24],
+[-0.31,-0.29,-0.22,-0.28,-0.25,-0.18,-0.35,-0.28,0.58,0.51,0.54,1.0, -0.44,0.31,-0.12,0.48,-0.14,-0.22],
+[ 0.12,0.11,0.18,0.54,0.48,0.38,0.14,0.10,-0.62,-0.52,-0.58,-0.44,1.0, -0.28,0.22,-0.55,0.35,0.18],
+[-0.28,-0.26,-0.31,-0.12,-0.10,-0.08,-0.22,-0.16,0.44,0.68,0.38,0.31,-0.28,1.0, -0.08,0.38,-0.14,-0.22],
+[ 0.35,0.37,0.28,0.29,0.26,0.18,0.12,0.08,-0.18,-0.12,-0.15,-0.12,0.22,-0.08,1.0, -0.14,0.16,0.12],
+[-0.28,-0.26,-0.20,-0.35,-0.31,-0.24,-0.18,-0.12,0.82,0.62,0.58,0.48,-0.55,0.38,-0.14,1.0, -0.22,-0.18],
+[ 0.22,0.21,0.18,0.44,0.40,0.35,0.14,0.10,-0.28,-0.22,-0.18,-0.14,0.35,-0.14,0.16,-0.22,1.0, 0.28],
+[ 0.41,0.39,0.55,0.28,0.25,0.19,0.16,0.12,-0.38,-0.28,-0.24,-0.22,0.18,-0.22,0.12,-0.18,0.28,1.0],
+];
+
+const CORR_INSIGHTS = {
+  'USO-BNO':   'WTI and Brent move almost in lockstep (0.94) — divergences historically signal regional supply disruptions or transport cost spikes.',
+  'USO-GLD':   'Oil-Gold correlation (0.48) strengthens significantly during Middle East crises — both serve as geopolitical risk proxies.',
+  'USO-SPY':   'Oil and S&P 500 show negative correlation (−0.22) — high oil prices historically act as a tax on economic growth.',
+  'GLD-IEF':   'Gold and 10Y Treasuries show positive correlation (0.54) — both are safe-haven assets during equity stress.',
+  'GLD-SPY':   'Gold and S&P 500 negative correlation (−0.41) is strongest during equity drawdowns — gold historically provides portfolio hedge.',
+  'SPY-SOXX':  'S&P 500 and Semiconductors highly correlated (0.82) — SOXX amplifies S&P moves by ~1.5x historically.',
+  'SPY-EWG':   'US and German equities correlate at 0.78 — European risk-off typically follows US lead with 1–2 day lag.',
+  'IEF-SPY':   'Bond-equity negative correlation (−0.62) is the classic 60/40 portfolio logic — historically reliable except in stagflation.',
+  'UNG-ICLN':  'Natural gas and clean energy show moderate positive correlation (0.55) — energy price spikes accelerate clean transition.',
+  'FXI-SPY':   'China and US equities correlate at 0.58 — lower than many expect due to different policy cycles.',
+  'LMT-USO':   'Defense and oil show 0.35 correlation — both benefit from Middle East tension, but via different mechanisms.',
+  'WEAT-SOYB': 'Agricultural commodities highly correlated (0.72) — weather and shipping disruptions affect both simultaneously.',
+  'FXE-EWG':   'EUR and German equities show 0.68 correlation — EUR strength historically headwind for DAX exporters, but both move with EU risk sentiment.',
+  'GLD-GDX':   'Gold bullion and gold miners correlate at 0.88 — miners offer 2–3x leverage to gold price moves historically.',
+};
+
+function getCorrInsight(sym1, sym2) {
+  const key1 = sym1 + '-' + sym2;
+  const key2 = sym2 + '-' + sym1;
+  return CORR_INSIGHTS[key1] || CORR_INSIGHTS[key2] ||
+    `${sym1} vs ${sym2}: correlation ${CORR_MATRIX[CORR_ASSETS.findIndex(a=>a.sym===sym1)][CORR_ASSETS.findIndex(a=>a.sym===sym2)].toFixed(2)}. Click other cells to explore relationships.`;
+}
+
+function corrColor(val) {
+  if (val === 1.0) return 'rgba(0,212,255,0.15)';
+  if (val >= 0.7)  return '#1a6b3a';
+  if (val >= 0.4)  return '#1a4a2e';
+  if (val >= 0.1)  return '#1a2a20';
+  if (val > -0.1)  return '#1e2a3a';
+  if (val > -0.4)  return '#4a1a1a';
+  if (val > -0.7)  return '#6b1a1a';
+  return '#8b0000';
+}
+
+function corrTextColor(val) {
+  if (Math.abs(val) >= 0.5) return 'rgba(255,255,255,0.85)';
+  return 'rgba(255,255,255,0.4)';
+}
+
+let currentCorrFilter = 'all';
+
+function setCorrFilter(filter) {
+  currentCorrFilter = filter;
+  document.querySelectorAll('.corr-filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderCorrMatrix(filter);
+}
+
+function renderCorrMatrix(filter) {
+  const assets = filter === 'all' ? CORR_ASSETS : CORR_ASSETS.filter(a => a.cat === filter);
+  const indices = assets.map(a => CORR_ASSETS.indexOf(a));
+
+  let html = '<table class="corr-table"><thead><tr><th></th>';
+
+  // Column headers
+  assets.forEach(a => {
+    html += `<th class="corr-col-header">${a.sym}<br><span style="font-size:8px;color:var(--text-muted)">${a.label}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  // Rows
+  indices.forEach((ri, ii) => {
+    html += `<tr><td class="corr-row-header">${assets[ii].sym}</td>`;
+    indices.forEach((ci, jj) => {
+      const val = CORR_MATRIX[ri][ci];
+      const isSelf = ri === ci;
+      const displayVal = isSelf ? '—' : val.toFixed(2);
+      const cellClass = isSelf ? 'corr-cell self' : 'corr-cell';
+      const bg = corrColor(val);
+      const color = isSelf ? 'var(--accent)' : corrTextColor(val);
+      const sym1 = assets[ii].sym;
+      const sym2 = assets[jj].sym;
+      html += `<td class="${cellClass}" style="background:${bg};color:${color}"
+        onclick="showCorrInsight('${sym1}','${sym2}',${val})">${displayVal}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('corr-matrix-container').innerHTML = html;
+}
+
+function showCorrInsight(sym1, sym2, val) {
+  if (sym1 === sym2) return;
+  const box = document.getElementById('corr-insight-box');
+  const dir = val > 0 ? 'positive' : 'negative';
+  const strength = Math.abs(val) >= 0.7 ? 'Strong' : Math.abs(val) >= 0.4 ? 'Moderate' : 'Weak';
+  const insight = getCorrInsight(sym1, sym2);
+  box.className = 'corr-insight active';
+  box.innerHTML = `<div style="margin-bottom:8px;display:flex;justify-content:space-between">
+    <span style="color:var(--accent);font-weight:700">${sym1} × ${sym2}</span>
+    <span style="color:${val>=0?'var(--green)':'var(--red)'};font-weight:700">${val>=0?'+':''}${val.toFixed(2)}</span>
+  </div>
+  <div style="color:var(--text-muted);font-size:9px;margin-bottom:8px">${strength} ${dir} correlation</div>
+  <div>${insight}</div>`;
+}
+
 // ─── PAGE NAVIGATION ─────────────────────────────────────────────────────────
 const PAGES = ['map','commodities','macro','correlations','reports'];
 function showPage(id) {
@@ -1362,6 +2096,8 @@ function showPage(id) {
     n.classList.toggle('active', pageMap[i] === id);
   });
   if (id === 'commodities') renderComm('all');
+  if (id === 'correlations') renderCorrMatrix('all');
+  if (id === 'macro') { initMacro(); }
 }
 
 // ─── COMMODITIES DATA ────────────────────────────────────────────────────────
