@@ -1126,9 +1126,10 @@ function renderEventsList() {
       <div class="event-meta">${ev.date}</div>
       <div class="event-assets">${ev.tags.slice(0,3).map(t=>`<span class="asset-tag ${tagCls(t)}">${t}</span>`).join('')}</div>
     `;
-  el.addEventListener('click', () => selectEvent(ev.id));
-  list.appendChild(el);
-});
+    el.addEventListener('click', () => selectEvent(ev.id));
+    list.appendChild(el);
+  });
+}
 
 // ─── SELECT EVENT ────────────────────────────────────────────────────────────
 function selectEvent(id) {
