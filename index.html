@@ -671,10 +671,42 @@
 <div class="bottom-bar"><div class="ticker-track" id="ticker-bar"></div></div>
 
 <script>
-// ─── EVENTS DATA ─────────────────────────────────────────────────────────────
+// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://sketzdvxvbmyfifilmqg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Ztk-_NrrScUk5SDW0a82jQ_yBlGuBNO';
+
+async function fetchEventsFromDB() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/geo_events?status=eq.active&order=id.asc`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
+    const rows = await res.json();
+    return rows.map(r => ({
+      id:           r.id,
+      lat:          parseFloat(r.lat),
+      lng:          parseFloat(r.lng),
+      title:        r.title,
+      region:       r.region,
+      severity:     r.severity,
+      date:         r.date_label || 'Ongoing',
+      summary:      r.summary,
+      tags:         r.tags || [],
+      tickers:      r.tickers || [],
+      tickerGroups: r.ticker_groups || {},
+      context:      r.context || ''
+    }));
+  } catch(e) {
+    console.warn('Supabase fetch failed, using fallback:', e.message);
+    return EVENTS_FALLBACK;
+  }
+}
+
+// ─── EVENTS FALLBACK (used if DB unreachable) ─────────────────────────────────
 // Context = historical facts & correlations only. No recommendations.
 
-const EVENTS = [
+const EVENTS_FALLBACK = [
   {
     id:1, lat:48.5, lng:34.0,
     title:"Russia-Ukraine Frontline Escalation",
@@ -897,6 +929,9 @@ const EVENTS = [
   }
 ];
 
+// ─── GLOBAL EVENTS (populated from DB or fallback) ───────────────────────────
+let EVENTS = [];
+
 // Bottom bar tickers (Yahoo Finance symbols)
 const TICKER_SYMBOLS = ["SPY","QQQ","DIA","USO","GLD","UNG","FXE","YCS","IEF","BTCUSD","WEAT","SOYB"];
 const TICKER_LABELS  = ["S&P 500","NASDAQ","DOW","WTI OIL","GOLD","NAT GAS","EUR/USD","USD/JPY","10Y UST","BTC/USD","WHEAT","SOYBEANS"];
@@ -1049,7 +1084,8 @@ const map = L.map('map', { center:[20,15], zoom:2.5, zoomControl:true, attributi
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains:'abcd', maxZoom:19 }).addTo(map);
 
 const markerMap = {};
-EVENTS.forEach(ev => {
+
+function addMarker(ev) {
   const colors = { critical:'#ff4757', high:'#ff6b35', medium:'#ffd32a', low:'#4a9eff' };
   const c = colors[ev.severity];
   const icon = L.divIcon({
@@ -1062,7 +1098,7 @@ EVENTS.forEach(ev => {
   const m = L.marker([ev.lat, ev.lng], {icon}).addTo(map).bindTooltip(ev.title, {permanent:false,direction:'top',offset:[0,-10]});
   m.on('click', () => selectEvent(ev.id));
   markerMap[ev.id] = m;
-});
+}
 
 // pulse animation style
 const styleEl = document.createElement('style');
@@ -1070,24 +1106,26 @@ styleEl.textContent = `@keyframes markerPulse{0%{transform:scale(1);opacity:0.7}
 document.head.appendChild(styleEl);
 
 // ─── EVENT LIST ─────────────────────────────────────────────────────────────
-const list = document.getElementById('events-list');
-EVENTS.forEach(ev => {
-  const el = document.createElement('div');
-  el.className = 'event-item';
-  el.id = `eli-${ev.id}`;
-  const tagCls = (t) => {
-    if (t.includes('Energy')||t.includes('Oil')||t.includes('Shipping')) return 'tag-oil';
-    if (t.includes('Monetary')||t.includes('ECB')||t.includes('IMF')||t.includes('Rate')) return 'tag-bond';
-    if (t.includes('Semi')||t.includes('Supply')||t.includes('Defense')) return 'tag-equity';
-    if (t.includes('FX')||t.includes('JPY')||t.includes('Currency')) return 'tag-fx';
-    return 'tag-commodity';
-  };
-  el.innerHTML = `
-    <div class="event-severity sev-${ev.severity}"><div class="severity-dot"></div>${ev.severity.toUpperCase()} · ${ev.region}</div>
-    <div class="event-title">${ev.title}</div>
-    <div class="event-meta">${ev.date}</div>
-    <div class="event-assets">${ev.tags.slice(0,3).map(t=>`<span class="asset-tag ${tagCls(t)}">${t}</span>`).join('')}</div>
-  `;
+function renderEventsList() {
+  const list = document.getElementById('events-list');
+  list.innerHTML = '';
+  EVENTS.forEach(ev => {
+    const el = document.createElement('div');
+    el.className = 'event-item';
+    el.id = `eli-${ev.id}`;
+    const tagCls = (t) => {
+      if (t.includes('Energy')||t.includes('Oil')||t.includes('Shipping')) return 'tag-oil';
+      if (t.includes('Monetary')||t.includes('ECB')||t.includes('IMF')||t.includes('Rate')) return 'tag-bond';
+      if (t.includes('Semi')||t.includes('Supply')||t.includes('Defense')) return 'tag-equity';
+      if (t.includes('FX')||t.includes('JPY')||t.includes('Currency')) return 'tag-fx';
+      return 'tag-commodity';
+    };
+    el.innerHTML = `
+      <div class="event-severity sev-${ev.severity}"><div class="severity-dot"></div>${ev.severity.toUpperCase()} · ${ev.region}</div>
+      <div class="event-title">${ev.title}</div>
+      <div class="event-meta">${ev.date}</div>
+      <div class="event-assets">${ev.tags.slice(0,3).map(t=>`<span class="asset-tag ${tagCls(t)}">${t}</span>`).join('')}</div>
+    `;
   el.addEventListener('click', () => selectEvent(ev.id));
   list.appendChild(el);
 });
@@ -1556,7 +1594,24 @@ function buildResolutionText(eventId) {
 }
 
 // ─── START ───────────────────────────────────────────────────────────────────
-loadAllPrices();
+async function init() {
+  // 1. Load events from Supabase (or fallback)
+  EVENTS = await fetchEventsFromDB();
+
+  // 2. Update event count
+  document.getElementById('ev-count').textContent = EVENTS.length;
+
+  // 3. Render sidebar list
+  renderEventsList();
+
+  // 4. Load prices
+  loadAllPrices();
+
+  // 5. Add map markers
+  EVENTS.forEach(ev => addMarker(ev));
+}
+
+init();
 // Refresh prices every 60 seconds
 setInterval(loadAllPrices, 60000);
 
@@ -1593,7 +1648,7 @@ const MACRO_EVENTS = [
         name:'In-Line Decision — Market Expectation Met',
         desc:'Fed does exactly what futures market priced in',
         historicalProb:'54% of meetings',
-        context:'In-line decisions historically produce muted immediate reactions — markets move in the press conference tone, not the decision itself. Jerome Powell's language around "data dependency" and "higher for longer" has been the dominant volatility driver since 2022. Watch the dot plot revisions for longer-term signal.',
+        context:"In-line decisions historically produce muted immediate reactions — markets move in the press conference tone, not the decision itself. Jerome Powell's language around data dependency and higher for longer has been the dominant volatility driver since 2022. Watch the dot plot revisions for longer-term signal.",
         impacts:[
           { sym:'SPY',  name:'S&P 500 ETF',    move:'+0.4%', pos:true,  window:'5-day', conf:'LOW (varied)' },
           { sym:'IEF',  name:'10Y Treasury',   move:'+0.2%', pos:true,  window:'5-day', conf:'LOW (varied)' },
@@ -1724,7 +1779,7 @@ const MACRO_EVENTS = [
     category:'Economic Data',
     frequency:'Quarterly',
     nextEvent:'Apr 16, 2025',
-    description:'China GDP is the primary driver of global commodity demand expectations. Given China's role as the world's largest consumer of iron ore, copper, and soybeans, its growth trajectory directly determines the outlook for miners, EM equities, and industrial metals.',
+    description:"China GDP is the primary driver of global commodity demand expectations. Given China's role as the world's largest consumer of iron ore, copper, and soybeans, its growth trajectory directly determines the outlook for miners, EM equities, and industrial metals.",
     watchAssets:['FXI','BHP','VALE','SOYB','USO'],
     scenarios:[
       {
@@ -1775,7 +1830,7 @@ const MACRO_EVENTS = [
     category:'Central Bank',
     frequency:'8x per year',
     nextEvent:'Apr 17, 2025',
-    description:'The European Central Bank sets rates for the Eurozone. ECB decisions primarily affect EUR/USD, European equities, and European bonds — but spillover to global risk sentiment is significant given the Eurozone's size (second largest economy globally).',
+    description:"The European Central Bank sets rates for the Eurozone. ECB decisions primarily affect EUR/USD, European equities, and European bonds — but spillover to global risk sentiment is significant given the Eurozone's size (second largest economy globally).",
     watchAssets:['FXE','EWG','IEF','GLD'],
     scenarios:[
       {
@@ -1856,7 +1911,7 @@ const MACRO_EVENTS = [
         name:'Production Increase — Supply Boost',
         desc:'OPEC+ announces production increase or unwind of cuts',
         historicalProb:'~25% of meetings',
-        context:'OPEC+ production increases are historically bearish for oil but have complex second-order effects. Airlines, consumer discretionary, and chemical companies benefit from lower input costs. The June 2023 OPEC+ increase announcement sent Brent down $4 in one session. Saudi Arabia's fiscal breakeven (~$80 Brent) historically caps how far and fast they will increase production.',
+        context:"OPEC+ production increases are historically bearish for oil but have complex second-order effects. Airlines, consumer discretionary, and chemical companies benefit from lower input costs. The June 2023 OPEC+ increase announcement sent Brent down $4 in one session. Saudi Arabia's fiscal breakeven (~$80 Brent) historically caps how far and fast they will increase production.",
         impacts:[
           { sym:'USO',  name:'WTI Oil ETF',     move:'-4.8%', pos:false, window:'5-day', conf:'HIGH (8/10 episodes)' },
           { sym:'BNO',  name:'Brent ETF',        move:'-5.1%', pos:false, window:'5-day', conf:'HIGH (8/10 episodes)' },
