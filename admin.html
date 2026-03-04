@@ -569,10 +569,16 @@
   </div>
 
   <!-- EXISTING EVENTS (read from localStorage drafts) -->
-  <div class="section-title" style="margin-top:8px">Current Events on Map</div>
+  <div class="section-title" style="margin-top:8px">Local / Draft Events</div>
   <div class="events-grid" id="events-grid"></div>
 
-</div>
+</div><!-- end tab-editor -->
+
+<!-- ── TAB: LIVE ──────────────────────────────── -->
+<div class="tab-content" id="tab-live">
+  <div class="section-title">From Database</div>
+  <div id="live-events-grid"><div style="color:var(--text-muted);font-family:Space Mono,monospace;font-size:11px;padding:20px">Loading from database...</div></div>
+</div><!-- end tab-live -->
 
 <div class="toast" id="toast">✓ Copied to clipboard</div>
 
@@ -770,8 +776,6 @@ function archiveEvent(id, title) {
 }
 
 renderEventsList();
-</div><!-- end tab-live -->
-
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://sketzdvxvbmyfifilmqg.supabase.co';
