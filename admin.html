@@ -460,14 +460,24 @@
           <div class="run-agent-info">
             <strong>Agent Scanner</strong> · Scans Reuters, BBC, Al Jazeera · Claude Haiku
           </div>
-          <button class="btn-run-agent" id="run-agent-btn" onclick="runAgent()">
-            <span id="run-icon">⚡</span> Run Scan Now
-          </button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-run-agent" id="run-report-btn" onclick="runReportAgent()" style="background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.25);color:var(--green)">
+              <span id="run-report-icon">📋</span> Generate Report
+            </button>
+            <button class="btn-run-agent" id="run-agent-btn" onclick="runAgent()">
+              <span id="run-icon">⚡</span> Run Scan Now
+            </button>
+          </div>
         </div>
 
         <div class="section-title">Pending Approval</div>
         <div id="queue-list">
           <div class="queue-empty"><div class="icon">✓</div>Loading queue...</div>
+        </div>
+
+        <div class="section-title" style="margin-top:32px">Draft Reports</div>
+        <div id="report-queue-list">
+          <div class="queue-empty"><div class="icon">📋</div>No draft reports.</div>
         </div>
       </div>
 
@@ -1116,9 +1126,104 @@ function showToast(msg, color) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// ── RUN REPORT AGENT ──────────────────────────────────────────────────────────
+async function runReportAgent() {
+  const btn  = document.getElementById('run-report-btn');
+  const icon = document.getElementById('run-report-icon');
+  btn.disabled = true;
+  icon.className = 'spin';
+  icon.textContent = '↻';
+
+  try {
+    const res = await fetch(`/api/agent-report?secret=${AGENT_SECRET}`);
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Report generated: "${data.report_title}" — awaiting approval ✓`, 'green');
+      setTimeout(() => loadReportQueue(), 500);
+    } else {
+      showToast('Report failed: ' + (data.error || 'Unknown error'), 'red');
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, 'red');
+  } finally {
+    btn.disabled = false;
+    icon.className = '';
+    icon.textContent = '📋';
+  }
+}
+
+// ── LOAD REPORT QUEUE ─────────────────────────────────────────────────────────
+async function loadReportQueue() {
+  try {
+    const reports = await sbFetch('/rest/v1/reports?status=eq.draft&order=week_of.desc');
+    const el = document.getElementById('report-queue-list');
+    if (!el) return;
+    if (!reports || reports.length === 0) {
+      el.innerHTML = '<div class="queue-empty"><div class="icon">✓</div>No draft reports.</div>';
+      return;
+    }
+    el.innerHTML = reports.map(r => {
+      let body = {};
+      try { body = JSON.parse(r.body); } catch(e) {}
+      const date = new Date(r.week_of).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+      return `<div class="queue-card" id="rcard-${r.id}">
+        <div class="queue-card-header">
+          <div class="qc-meta">
+            <div class="qc-title">${r.title}</div>
+            <div class="qc-subtitle"><span>Week of ${date}</span> · <span>${(r.key_assets||[]).slice(0,5).join(', ')}</span></div>
+          </div>
+          <div class="qc-actions">
+            <button class="btn-reject" onclick="rejectReport(${r.id})">✕ Discard</button>
+            <button class="btn-approve" onclick="publishReport(${r.id})">✓ Publish</button>
+          </div>
+        </div>
+        <div class="queue-card-body open" style="display:block">
+          <div class="qc-section-label">Subtitle</div>
+          <div class="qc-summary">${body.subtitle || '—'}</div>
+          <div class="qc-section-label">Top Story</div>
+          <div class="qc-summary">${body.top_story?.headline || '—'}</div>
+          <div class="qc-section-label">Key Assets</div>
+          <div class="qc-tickers">${(r.key_assets||[]).map(a=>`<span class="qc-ticker">${a}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('Report queue error:', e);
+  }
+}
+
+async function publishReport(id) {
+  if (!confirm('Publish this report to the live site?')) return;
+  try {
+    await sbFetch(`/rest/v1/reports?id=eq.${id}`, {
+      method: 'PATCH',
+      prefer: 'return=minimal',
+      body: JSON.stringify({ status: 'published' })
+    });
+    const card = document.getElementById(`rcard-${id}`);
+    card.classList.add('approved');
+    card.querySelector('.qc-actions').innerHTML = '<span style="color:var(--green);font-family:Space Mono,monospace;font-size:11px">✓ Published</span>';
+    showToast('Report published to theta23.com ✓', 'green');
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function rejectReport(id) {
+  if (!confirm('Discard this report?')) return;
+  try {
+    await sbFetch(`/rest/v1/reports?id=eq.${id}`, {
+      method: 'PATCH',
+      prefer: 'return=minimal',
+      body: JSON.stringify({ status: 'archived' })
+    });
+    loadReportQueue();
+    showToast('Report discarded', 'red');
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadStats();
 loadQueue();
+loadReportQueue();
 
 </script>
 </body>
