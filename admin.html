@@ -423,6 +423,79 @@
 </head>
 <body>
 
+<!-- ── PASSWORD GATE ────────────────────────────────────────── -->
+<div id="auth-gate" style="
+  position:fixed; inset:0; z-index:9999;
+  background:#080a0e;
+  display:flex; align-items:center; justify-content:center;
+">
+  <div style="
+    background:#0d1117; border:1px solid #1e2a3a;
+    border-radius:10px; padding:40px 48px;
+    width:360px; text-align:center;
+  ">
+    <div style="font-family:Syne,sans-serif;font-size:22px;font-weight:800;color:#e8edf5;margin-bottom:4px">
+      θ<span style="color:#00d4ff">23</span>
+    </div>
+    <div style="font-family:Space Mono,monospace;font-size:10px;color:#6b7a8f;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:32px">
+      Internal Admin
+    </div>
+    <input
+      id="pw-input"
+      type="password"
+      placeholder="Enter password"
+      onkeydown="if(event.key==='Enter')checkPw()"
+      style="
+        width:100%; padding:12px 16px; margin-bottom:12px;
+        background:#111722; border:1px solid #2a3a50;
+        border-radius:6px; color:#e8edf5;
+        font-family:Space Mono,monospace; font-size:13px;
+        outline:none; box-sizing:border-box;
+      "
+    >
+    <div id="pw-error" style="
+      font-family:Space Mono,monospace;font-size:11px;
+      color:#ff4757;margin-bottom:10px;min-height:16px;
+    "></div>
+    <button onclick="checkPw()" style="
+      width:100%; padding:12px;
+      background:#00d4ff; border:none; border-radius:6px;
+      color:#000; font-family:Syne,sans-serif;
+      font-size:13px; font-weight:800; cursor:pointer;
+    ">Enter</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const ADMIN_PW = 'elliot6499@';
+  const SESSION_KEY = 'theta23_auth';
+
+  function checkPw() {
+    const val = document.getElementById('pw-input').value;
+    if (val === ADMIN_PW) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      document.getElementById('auth-gate').style.display = 'none';
+    } else {
+      const err = document.getElementById('pw-error');
+      err.textContent = 'Incorrect password';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+      setTimeout(() => { err.textContent = ''; }, 2000);
+    }
+  }
+  window.checkPw = checkPw;
+
+  // Auto-unlock if already authenticated this session
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    document.getElementById('auth-gate').style.display = 'none';
+  } else {
+    // Focus input after render
+    setTimeout(() => document.getElementById('pw-input').focus(), 100);
+  }
+})();
+</script>
+
 <header>
   <div class="logo">θ<span>23</span></div>
   <div class="header-tag">⚡ Event Editor — Internal</div>
