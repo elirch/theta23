@@ -661,11 +661,191 @@
 
 <!-- ── REPORTS PAGE ───────────────────────────────────────────── -->
 <div class="page" id="page-reports">
-  <div class="page-placeholder">
-    <div class="placeholder-icon">📋</div>
-    <div class="placeholder-title">Reports</div>
-    <div class="placeholder-sub">Weekly intelligence briefs — Coming soon</div>
+<style>
+  /* ── REPORTS ─────────────────────────────────────────────── */
+  .reports-layout { display:grid; grid-template-columns:280px 1fr; gap:0; height:calc(100vh - 56px - 40px); }
+  .reports-sidebar {
+    border-right:1px solid var(--border);
+    overflow-y:auto; padding:20px 0;
+    scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+  }
+  .reports-sidebar-title {
+    font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
+    letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted);
+    padding:0 20px 12px;
+  }
+  .report-item {
+    padding:14px 20px; border-bottom:1px solid var(--border);
+    cursor:pointer; transition:background 0.12s;
+  }
+  .report-item:hover { background:rgba(255,255,255,0.03); }
+  .report-item.active { background:rgba(0,212,255,0.06); border-left:2px solid var(--accent); }
+  .report-item-date {
+    font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted);
+    letter-spacing:0.1em; text-transform:uppercase; margin-bottom:5px;
+  }
+  .report-item-title {
+    font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--text);
+    line-height:1.4;
+  }
+  .report-item-sub {
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted);
+    margin-top:4px; line-height:1.4;
+  }
+  .report-badge {
+    display:inline-block; font-family:'Space Mono',monospace; font-size:9px;
+    padding:2px 7px; border-radius:3px; margin-top:6px; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase;
+  }
+  .report-badge.published { background:rgba(0,230,118,0.1); color:#00e676; border:1px solid rgba(0,230,118,0.25); }
+  .report-badge.draft { background:rgba(255,211,42,0.1); color:#ffd32a; border:1px solid rgba(255,211,42,0.25); }
+
+  /* Main content */
+  .reports-main {
+    overflow-y:auto; padding:36px 48px;
+    scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+  }
+  .report-header { margin-bottom:32px; }
+  .report-week-label {
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--accent);
+    letter-spacing:0.15em; text-transform:uppercase; margin-bottom:10px;
+  }
+  .report-main-title {
+    font-family:'Syne',sans-serif; font-size:26px; font-weight:800;
+    color:var(--text); line-height:1.2; margin-bottom:10px;
+  }
+  .report-subtitle {
+    font-family:'Space Mono',monospace; font-size:12px; color:var(--text-muted);
+    line-height:1.6; border-left:2px solid var(--accent); padding-left:14px;
+  }
+
+  /* Sections */
+  .report-section { margin-bottom:36px; }
+  .report-section-label {
+    font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
+    letter-spacing:0.2em; text-transform:uppercase; color:var(--text-muted);
+    margin-bottom:16px; display:flex; align-items:center; gap:10px;
+  }
+  .report-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* Top story */
+  .top-story-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:24px; border-left:3px solid var(--accent);
+  }
+  .top-story-headline {
+    font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
+    color:var(--text); margin-bottom:12px;
+  }
+  .top-story-body {
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim);
+    line-height:1.8;
+  }
+  .top-story-assets { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
+  .asset-chip {
+    background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2);
+    border-radius:4px; padding:3px 9px;
+    font-family:'Space Mono',monospace; font-size:10px; font-weight:700; color:var(--accent);
+  }
+
+  /* Three things */
+  .three-things-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  .thing-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:18px;
+  }
+  .thing-title {
+    font-family:'Syne',sans-serif; font-size:12px; font-weight:800;
+    color:var(--text); margin-bottom:8px;
+  }
+  .thing-body {
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--text-muted);
+    line-height:1.7;
+  }
+  .thing-assets { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
+
+  /* Chart of the week */
+  .chart-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:24px;
+    display:flex; gap:20px; align-items:flex-start;
+  }
+  .chart-ticker-big {
+    font-family:'Space Mono',monospace; font-size:28px; font-weight:700;
+    color:var(--accent); min-width:80px; padding-top:4px;
+  }
+  .chart-right { flex:1; }
+  .chart-title {
+    font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
+    color:var(--text); margin-bottom:8px;
+  }
+  .chart-body {
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--text-muted);
+    line-height:1.7;
+  }
+
+  /* Risk radar */
+  .risk-table { width:100%; border-collapse:collapse; }
+  .risk-table th {
+    font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted);
+    padding:8px 12px; text-align:left; border-bottom:1px solid var(--border);
+  }
+  .risk-table td {
+    font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim);
+    padding:10px 12px; border-bottom:1px solid var(--border);
+  }
+  .risk-pill {
+    display:inline-block; padding:2px 8px; border-radius:3px;
+    font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+  }
+  .risk-pill.high { background:rgba(255,71,87,0.12); color:#ff4757; }
+  .risk-pill.medium { background:rgba(255,211,42,0.12); color:#ffd32a; }
+  .risk-pill.low { background:rgba(0,230,118,0.1); color:#00e676; }
+
+  /* Closing note */
+  .closing-card {
+    background:rgba(0,212,255,0.04); border:1px solid rgba(0,212,255,0.15);
+    border-radius:8px; padding:20px 24px;
+    font-family:'Space Mono',monospace; font-size:12px; color:var(--text-dim);
+    line-height:1.7; font-style:italic;
+  }
+
+  /* Empty state */
+  .reports-empty {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    height:100%; text-align:center; color:var(--text-muted);
+    font-family:'Space Mono',monospace;
+  }
+  .reports-empty .icon { font-size:40px; margin-bottom:16px; opacity:0.4; }
+  .reports-empty .msg { font-size:12px; margin-bottom:6px; }
+  .reports-empty .sub { font-size:10px; opacity:0.6; }
+
+  .report-loading {
+    display:flex; align-items:center; justify-content:center;
+    height:200px; font-family:'Space Mono',monospace; font-size:11px;
+    color:var(--text-muted);
+  }
+</style>
+
+<div class="reports-layout">
+  <!-- Sidebar -->
+  <div class="reports-sidebar">
+    <div class="reports-sidebar-title">Intelligence Briefs</div>
+    <div id="reports-list">
+      <div style="padding:20px;font-family:Space Mono,monospace;font-size:11px;color:var(--text-muted)">Loading...</div>
+    </div>
   </div>
+
+  <!-- Main -->
+  <div class="reports-main" id="reports-main">
+    <div class="reports-empty">
+      <div class="icon">📋</div>
+      <div class="msg">Select a report from the sidebar</div>
+      <div class="sub">Weekly intelligence briefs — published every Monday</div>
+    </div>
+  </div>
+</div>
 </div>
 
 <div class="bottom-bar"><div class="ticker-track" id="ticker-bar"></div></div>
@@ -2154,6 +2334,7 @@ function showPage(id) {
   if (id === 'commodities') renderComm('all');
   if (id === 'correlations') renderCorrMatrix('all');
   if (id === 'macro') { initMacro(); }
+  if (id === 'reports') { loadReports(); }
 }
 
 // ─── COMMODITIES DATA ────────────────────────────────────────────────────────
@@ -2282,6 +2463,138 @@ function renderComm(cat) {
   });
 
   document.getElementById('comm-main-content').innerHTML = html;
+}
+
+// ─── REPORTS ─────────────────────────────────────────────────────────────────
+let reportsData = [];
+let reportsLoaded = false;
+
+async function loadReports() {
+  if (reportsLoaded) return;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/reports?status=eq.published&order=week_of.desc&limit=20`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    const data = await res.json();
+    reportsData = data;
+    reportsLoaded = true;
+    renderReportsList();
+    if (data.length > 0) renderReport(0);
+  } catch(e) {
+    document.getElementById('reports-list').innerHTML =
+      `<div style="padding:20px;font-family:Space Mono,monospace;font-size:11px;color:#ff4757">Error loading reports</div>`;
+  }
+}
+
+function renderReportsList() {
+  const el = document.getElementById('reports-list');
+  if (!reportsData || reportsData.length === 0) {
+    el.innerHTML = `<div style="padding:20px 20px;font-family:Space Mono,monospace;font-size:11px;color:var(--text-muted);line-height:1.6">
+      No published reports yet.<br><br>
+      Reports are published weekly every Monday.
+    </div>`;
+    return;
+  }
+  el.innerHTML = reportsData.map((r, i) => {
+    let body = {};
+    try { body = JSON.parse(r.body); } catch(e) {}
+    const date = new Date(r.week_of).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    return `<div class="report-item ${i===0?'active':''}" onclick="renderReport(${i})" id="ritem-${i}">
+      <div class="report-item-date">Week of ${date}</div>
+      <div class="report-item-title">${body.title || r.title}</div>
+      <div class="report-item-sub">${body.subtitle || ''}</div>
+      <span class="report-badge published">Published</span>
+    </div>`;
+  }).join('');
+}
+
+function renderReport(idx) {
+  // Update sidebar active state
+  document.querySelectorAll('.report-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+
+  const r = reportsData[idx];
+  let d = {};
+  try { d = JSON.parse(r.body); } catch(e) { d = {}; }
+
+  const date = new Date(r.week_of).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+  const riskRows = (d.risk_radar || []).map(risk => `
+    <tr>
+      <td>${risk.event}</td>
+      <td><span class="risk-pill ${risk.probability}">${risk.probability}</span></td>
+      <td><span class="risk-pill ${risk.impact}">${risk.impact}</span></td>
+    </tr>`).join('');
+
+  const threeThings = (d.three_things || []).map(t => `
+    <div class="thing-card">
+      <div class="thing-title">${t.title}</div>
+      <div class="thing-body">${t.body}</div>
+      <div class="thing-assets">
+        ${(t.assets||[]).map(a => `<span class="asset-chip">${a}</span>`).join('')}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('reports-main').innerHTML = `
+    <div class="report-header">
+      <div class="report-week-label">Week of ${date}</div>
+      <div class="report-main-title">${d.title || r.title}</div>
+      <div class="report-subtitle">${d.subtitle || ''}</div>
+    </div>
+
+    ${d.top_story ? `
+    <div class="report-section">
+      <div class="report-section-label">Top Story</div>
+      <div class="top-story-card">
+        <div class="top-story-headline">${d.top_story.headline}</div>
+        <div class="top-story-body">${d.top_story.body}</div>
+        <div class="top-story-assets">
+          ${(d.top_story.key_assets||[]).map(a => `<span class="asset-chip">${a}</span>`).join('')}
+        </div>
+      </div>
+    </div>` : ''}
+
+    ${d.three_things ? `
+    <div class="report-section">
+      <div class="report-section-label">3 Things That Mattered</div>
+      <div class="three-things-grid">${threeThings}</div>
+    </div>` : ''}
+
+    ${d.chart_of_the_week ? `
+    <div class="report-section">
+      <div class="report-section-label">Chart of the Week</div>
+      <div class="chart-card">
+        <div class="chart-ticker-big">${d.chart_of_the_week.ticker}</div>
+        <div class="chart-right">
+          <div class="chart-title">${d.chart_of_the_week.title}</div>
+          <div class="chart-body">${d.chart_of_the_week.body}</div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    ${d.risk_radar && d.risk_radar.length > 0 ? `
+    <div class="report-section">
+      <div class="report-section-label">Risk Radar</div>
+      <table class="risk-table">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Probability</th>
+            <th>Market Impact</th>
+          </tr>
+        </thead>
+        <tbody>${riskRows}</tbody>
+      </table>
+    </div>` : ''}
+
+    ${d.closing_note ? `
+    <div class="report-section">
+      <div class="report-section-label">Closing Note</div>
+      <div class="closing-card">"${d.closing_note}"</div>
+    </div>` : ''}
+  `;
 }
 
 </script>
