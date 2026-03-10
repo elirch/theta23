@@ -1,16 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/agent-scan?secret=theta23run2024",
+      "path": "/api/agent-run-all?secret=theta23run2024",
       "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/agent-archive?secret=theta23run2024",
-      "schedule": "0 9 * * 1"
-    },
-    {
-      "path": "/api/agent-report?secret=theta23run2024",
-      "schedule": "0 10 * * 1"
     }
   ]
 }
