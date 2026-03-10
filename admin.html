@@ -468,7 +468,7 @@
 
 <script>
 (function() {
-  const ADMIN_PW = 'elliot6499@';
+  const ADMIN_PW = 'theta23admin';
   const SESSION_KEY = 'theta23_auth';
 
   function checkPw() {
@@ -536,6 +536,9 @@
           <div style="display:flex;gap:8px;">
             <button class="btn-run-agent" id="run-report-btn" onclick="runReportAgent()" style="background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.25);color:var(--green)">
               <span id="run-report-icon">📋</span> Generate Report
+            </button>
+            <button class="btn-run-agent" id="run-archive-btn" onclick="runArchiveAgent()" style="background:rgba(255,165,0,0.08);border-color:rgba(255,165,0,0.25);color:#ffa500">
+              <span id="run-archive-icon">🗄️</span> Run Archive
             </button>
             <button class="btn-run-agent" id="run-agent-btn" onclick="runAgent()">
               <span id="run-icon">⚡</span> Run Scan Now
@@ -1197,6 +1200,31 @@ function showToast(msg, color) {
   t.style.color = color === 'green' ? 'var(--green)' : 'var(--red)';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── RUN ARCHIVE AGENT ─────────────────────────────────────────────────────────
+async function runArchiveAgent() {
+  const btn  = document.getElementById('run-archive-btn');
+  const icon = document.getElementById('run-archive-icon');
+  btn.disabled = true;
+  icon.textContent = '↻';
+
+  try {
+    const res = await fetch(`/api/agent-archive?secret=${AGENT_SECRET}`);
+    const data = await res.json();
+    if (data.success) {
+      const msg = `Archive done — ${data.archived} archived, ${data.escalated} escalated, ${data.ongoing} ongoing (${data.elapsed})`;
+      showToast(msg, 'green');
+      loadStats();
+    } else {
+      showToast('Archive failed: ' + (data.error || 'Unknown'), 'red');
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, 'red');
+  } finally {
+    btn.disabled = false;
+    icon.textContent = '🗄️';
+  }
 }
 
 // ── RUN REPORT AGENT ──────────────────────────────────────────────────────────
