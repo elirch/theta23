@@ -2108,16 +2108,49 @@ const MACRO_EVENTS = [
 // ─── RENDER MACRO ─────────────────────────────────────────────────────────────
 let selectedMacroId = null;
 
-function initMacro() {
+async function initMacro() {
   const list = document.getElementById('macro-event-list');
-  list.innerHTML = MACRO_EVENTS.map(ev => `
-    <div class="macro-event-btn" id="mbtn-${ev.id}" onclick="showMacroEvent('${ev.id}')">
+
+  // Fetch live dates from DB
+  let dbDates = {};
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/macro_events?select=*`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    const rows = await res.json();
+    rows.forEach(r => { dbDates[r.event_id] = r; });
+  } catch(e) { /* use hardcoded fallback */ }
+
+  // Merge DB dates into MACRO_EVENTS
+  MACRO_EVENTS.forEach(ev => {
+    if (dbDates[ev.id]) {
+      const db = dbDates[ev.id];
+      if (db.next_event_label) ev.nextEvent = db.next_event_label;
+      if (db.next_event_date)  ev.nextEventDate = db.next_event_date;
+      if (db.last_outcome)     ev.lastOutcome = db.last_outcome;
+      if (db.last_outcome_date) ev.lastOutcomeDate = db.last_outcome_date;
+      if (db.scenario_triggered) ev.scenarioTriggered = db.scenario_triggered;
+    }
+  });
+
+  list.innerHTML = MACRO_EVENTS.map(ev => {
+    const isUpcoming = ev.nextEventDate && new Date(ev.nextEventDate) > new Date();
+    const daysUntil = ev.nextEventDate
+      ? Math.ceil((new Date(ev.nextEventDate) - new Date()) / (1000*60*60*24))
+      : null;
+    const urgency = daysUntil !== null && daysUntil <= 7
+      ? `<span style="color:#ff4757;font-weight:700">${daysUntil}d</span>`
+      : daysUntil !== null ? `<span>${daysUntil}d</span>` : '';
+    return `<div class="macro-event-btn" id="mbtn-${ev.id}" onclick="showMacroEvent('${ev.id}')">
       <div class="macro-event-btn-name">${ev.name}</div>
       <div class="macro-event-btn-meta">
         <span class="macro-event-btn-freq">${ev.category}</span>
-        <span>${ev.frequency}</span>
+        <span>${ev.nextEvent || ev.frequency}</span>
+        ${urgency}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function showMacroEvent(id) {
@@ -2162,6 +2195,9 @@ function showMacroEvent(id) {
       <div class="macro-header-meta">
         <div class="macro-meta-pill">Next: ${ev.nextEvent}</div>
         <div class="macro-meta-pill">Watch: ${ev.watchAssets.join(' · ')}</div>
+        ${ev.lastOutcome ? `<div class="macro-meta-pill" style="border-color:rgba(0,230,118,0.3);color:#00e676">
+          Last: ${ev.lastOutcome}${ev.scenarioTriggered ? ` — Scenario ${ev.scenarioTriggered}` : ''}
+        </div>` : ''}
       </div>
     </div>
 
