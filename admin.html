@@ -468,7 +468,7 @@
 
 <script>
 (function() {
-  const ADMIN_PW = 'elliot6499479@';
+  const ADMIN_PW = 'elliot6499@';
   const SESSION_KEY = 'theta23_auth';
 
   function checkPw() {
@@ -539,6 +539,9 @@
             </button>
             <button class="btn-run-agent" id="run-archive-btn" onclick="runArchiveAgent()" style="background:rgba(255,165,0,0.08);border-color:rgba(255,165,0,0.25);color:#ffa500">
               <span id="run-archive-icon">🗄️</span> Run Archive
+            </button>
+            <button class="btn-run-agent" id="run-macro-btn" onclick="runMacroAgent()" style="background:rgba(147,112,219,0.08);border-color:rgba(147,112,219,0.25);color:#9370db">
+              <span id="run-macro-icon">📅</span> Update Macro
             </button>
             <button class="btn-run-agent" id="run-agent-btn" onclick="runAgent()">
               <span id="run-icon">⚡</span> Run Scan Now
@@ -1200,6 +1203,29 @@ function showToast(msg, color) {
   t.style.color = color === 'green' ? 'var(--green)' : 'var(--red)';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── RUN MACRO AGENT ───────────────────────────────────────────────────────────
+async function runMacroAgent() {
+  const btn  = document.getElementById('run-macro-btn');
+  const icon = document.getElementById('run-macro-icon');
+  btn.disabled = true;
+  icon.textContent = '↻';
+
+  try {
+    const res = await fetch(`/api/agent-macro?secret=${AGENT_SECRET}`);
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Macro updated — ${data.events_updated} events (${data.elapsed}) ✓`, 'green');
+    } else {
+      showToast('Macro failed: ' + (data.error || 'Unknown'), 'red');
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, 'red');
+  } finally {
+    btn.disabled = false;
+    icon.textContent = '📅';
+  }
 }
 
 // ── RUN ARCHIVE AGENT ─────────────────────────────────────────────────────────
