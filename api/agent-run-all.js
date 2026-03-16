@@ -47,8 +47,10 @@ export default async function handler(req, res) {
     await runAgent('report', '/api/agent-report', log);
   }
 
-  // ── 4. MACRO (add when ready) ─────────────────────────────
-  // if (isMonday) await runAgent('macro', '/api/agent-macro', log);
+  // ── 4. MACRO (Mondays only) ───────────────────────────────────
+  if (isMonday) {
+    await runAgent('macro', '/api/agent-macro', log);
+  }
 
   // ── 5. COMMODITIES (add when ready) ───────────────────────
   // await runAgent('commodities', '/api/agent-commodities', log);
