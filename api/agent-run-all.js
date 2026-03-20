@@ -52,7 +52,8 @@ export default async function handler(req, res) {
     await runAgent('macro', '/api/agent-macro', log);
   }
 
-  // ── 5. COMMODITIES (add when ready) ───────────────────────
+  // ── 5. COMMODITIES (daily — geo signals change with news) ─────
+  await runAgent('commodities', '/api/agent-commodities', log);
   // await runAgent('commodities', '/api/agent-commodities', log);
 
   return res.status(200).json({
