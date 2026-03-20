@@ -222,6 +222,41 @@
   .comm-geo-link { display:inline-flex; align-items:center; gap:4px; margin-top:10px; font-family:"Space Mono",monospace; font-size:9px; color:var(--accent); opacity:0.7; }
   .comm-geo-link::before { content:"⊕"; font-size:10px; }
 
+  /* Signal indicator */
+  .comm-signal-bar {
+    margin-top:12px; padding-top:12px; border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .comm-signal-label {
+    font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
+    letter-spacing:0.1em; text-transform:uppercase;
+  }
+  .comm-signal-label.ELEVATED { color:#ff4757; }
+  .comm-signal-label.MODERATE { color:#ffd32a; }
+  .comm-signal-label.LOW      { color:#ff6b35; }
+  .comm-signal-label.NEUTRAL  { color:var(--text-muted); }
+  .comm-signal-score {
+    font-family:'Space Mono',monospace; font-size:11px; font-weight:700; color:var(--text-muted);
+  }
+  .comm-hot-driver {
+    margin-top:6px; font-family:'Space Mono',monospace; font-size:10px;
+    color:var(--text-dim); line-height:1.5;
+    padding:8px 10px; background:rgba(0,212,255,0.04);
+    border:1px solid rgba(0,212,255,0.1); border-radius:4px;
+  }
+  .comm-geo-events {
+    margin-top:8px; display:flex; flex-wrap:wrap; gap:5px;
+  }
+  .comm-geo-tag {
+    font-family:'Space Mono',monospace; font-size:9px; padding:2px 8px;
+    border-radius:3px; cursor:pointer; transition:opacity 0.15s;
+  }
+  .comm-geo-tag:hover { opacity:0.8; }
+  .comm-geo-tag.critical { background:rgba(255,71,87,0.12); color:#ff4757; border:1px solid rgba(255,71,87,0.25); }
+  .comm-geo-tag.high     { background:rgba(255,107,53,0.12); color:#ff6b35; border:1px solid rgba(255,107,53,0.25); }
+  .comm-geo-tag.medium   { background:rgba(255,211,42,0.12); color:#ffd32a; border:1px solid rgba(255,211,42,0.25); }
+  .comm-geo-tag.low      { background:rgba(74,158,255,0.12); color:#4a9eff; border:1px solid rgba(74,158,255,0.25); }
+
   /* Coming soon pages */
   .page-placeholder { display:flex; flex:1; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
   .placeholder-icon { font-size:48px; opacity:0.3; }
@@ -2367,7 +2402,7 @@ function showPage(id) {
     const pageMap = ['map','commodities','macro','correlations','reports'];
     n.classList.toggle('active', pageMap[i] === id);
   });
-  if (id === 'commodities') renderComm('all');
+  if (id === 'commodities') { loadCommSignals().then(() => renderComm('all')); }
   if (id === 'correlations') renderCorrMatrix('all');
   if (id === 'macro') { initMacro(); }
   if (id === 'reports') { loadReports(); }
@@ -2445,6 +2480,20 @@ const COMM_DATA = [
 
 // ─── RENDER COMMODITIES ───────────────────────────────────────────────────────
 let currentCommFilter = 'all';
+let commSignals = {}; // DB signals cache
+
+async function loadCommSignals() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/commodities?select=sym,signal_score,signal_label,linked_events,hot_driver`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    const rows = await res.json();
+    if (Array.isArray(rows)) {
+      rows.forEach(r => { commSignals[r.sym] = r; });
+    }
+  } catch(e) { /* use empty signals */ }
+}
 
 function filterComm(cat) {
   currentCommFilter = cat;
@@ -2477,6 +2526,24 @@ function renderComm(cat) {
       const price = d ? d.price : '—';
       const change = d ? d.change : '…';
       const changeClass = d ? (d.up ? 'up' : 'down') : 'load';
+
+      // Live signal from DB
+      const sig = commSignals[c.sym];
+      const signalHtml = sig ? `
+        <div class="comm-signal-bar">
+          <span class="comm-signal-label ${sig.signal_label}">${sig.signal_label}</span>
+          <span class="comm-signal-score">GEO ${sig.signal_score}/100</span>
+        </div>
+        ${sig.hot_driver ? `<div class="comm-hot-driver">⚡ ${sig.hot_driver}</div>` : ''}
+        ${sig.linked_events && sig.linked_events.length > 0 ? `
+          <div class="comm-geo-events">
+            ${sig.linked_events.map(ev => `
+              <span class="comm-geo-tag ${ev.severity}" onclick="showPage('map');setTimeout(()=>selectEvent(${ev.id}),300)" title="${ev.title}">
+                ${ev.title.slice(0,28)}${ev.title.length>28?'…':''}
+              </span>`).join('')}
+          </div>` : ''}
+      ` : `<div class="comm-geo-link">Linked to: ${c.geoLinks.join(' · ')}</div>`;
+
       html += `<div class="comm-card" style="--card-accent:${c.accent}">
         <div class="comm-card-header">
           <div>
@@ -2492,7 +2559,7 @@ function renderComm(cat) {
           <div class="comm-drivers-label">Geopolitical Drivers</div>
           ${c.drivers.map(d => `<div class="comm-driver-item"><div class="comm-driver-dot"></div><div class="comm-driver-text">${d}</div></div>`).join('')}
         </div>
-        ${c.geoLinks.length ? `<div class="comm-geo-link">Linked to: ${c.geoLinks.join(' · ')}</div>` : ''}
+        ${signalHtml}
       </div>`;
     });
     html += '</div>';
