@@ -543,6 +543,9 @@
             <button class="btn-run-agent" id="run-macro-btn" onclick="runMacroAgent()" style="background:rgba(147,112,219,0.08);border-color:rgba(147,112,219,0.25);color:#9370db">
               <span id="run-macro-icon">📅</span> Update Macro
             </button>
+            <button class="btn-run-agent" id="run-comm-btn" onclick="runCommAgent()" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.25);color:#f59e0b">
+              <span id="run-comm-icon">🌐</span> Update Commodities
+            </button>
             <button class="btn-run-agent" id="run-agent-btn" onclick="runAgent()">
               <span id="run-icon">⚡</span> Run Scan Now
             </button>
@@ -1203,6 +1206,28 @@ function showToast(msg, color) {
   t.style.color = color === 'green' ? 'var(--green)' : 'var(--red)';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── RUN COMMODITIES AGENT ─────────────────────────────────────────────────────
+async function runCommAgent() {
+  const btn  = document.getElementById('run-comm-btn');
+  const icon = document.getElementById('run-comm-icon');
+  btn.disabled = true;
+  icon.textContent = '↻';
+  try {
+    const res = await fetch(`/api/agent-commodities?secret=${AGENT_SECRET}`);
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Commodities updated — ${data.commodities_updated} signals, ${data.elevated_signals} elevated (${data.elapsed}) ✓`, 'green');
+    } else {
+      showToast('Commodities failed: ' + (data.error || 'Unknown'), 'red');
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, 'red');
+  } finally {
+    btn.disabled = false;
+    icon.textContent = '🌐';
+  }
 }
 
 // ── RUN MACRO AGENT ───────────────────────────────────────────────────────────
