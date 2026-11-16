@@ -1,0 +1,11 @@
+partNumber,description,subsystem,supplierLocationCode,supplierName,routeCode,milestoneCode,baselineArrivalDate,preparationDays,isSingleSource,notes
+KS-FC-101,Flight Computer,Avionics,SUP-TLS,Aurelia Avionique,RT-TLS-ABQ,ENV-TEST,2027-06-01,10,false,Flight unit with qualified flight software load.
+KS-ST-202,Star Tracker,Attitude Control,SUP-MUC,Isarwerk Optik,RT-MUC-ABQ,ENV-TEST,2027-05-28,12,true,Only qualified source for this optical head; alignment needs 12 days.
+KS-RW-303,Reaction Wheel Assembly,Attitude Control,SUP-YUL,Laurentide Motion,RT-YUL-ABQ,ENV-TEST,2027-05-25,9,false,Set of four wheels.
+KS-PD-404,Power Conditioning and Distribution Unit,Power,SUP-BLR,Kaveri Power Systems,RT-BLR-ABQ,AIT-RR,2027-04-16,10,false,
+KS-BT-405,Lithium-Ion Battery Module,Power,SUP-NGO,Hoshikawa Energy,RT-NGO-ABQ,AIT-RR,2027-04-20,8,false,Ships at storage charge; acceptance cycling on arrival.
+KS-XT-505,X-Band Transmitter,Communications,SUP-NGO,Chubu Microwave Works,RT-NGO-ABQ,ENV-TEST,2027-06-02,12,false,RF compatibility checks dominate preparation.
+KS-TH-606,Thermal Control Kit,Thermal,SUP-BLR,Deccan Thermal Labs,RT-BLR-ABQ,ENV-TEST,2027-06-03,7,false,"Heaters, thermistors and radiator panels."
+KS-SP-707,Primary Structure Panel Set,Structure,SUP-YUL,Northfield Structures,RT-YUL-ABQ,AIT-RR,2027-04-14,14,false,
+KS-PC-808,Propulsion Control Electronics,Propulsion Control,SUP-BLR,Kaveri Power Systems,RT-BLR-ABQ,LIC,2027-06-30,10,false,Late-delivery flight unit; a qualification model supports testing.
+KS-SR-909,Separation Ring and Adapter Harness,Structure,SUP-YUL,Northfield Structures,RT-YUL-LPC,LIC,2027-07-05,5,false,Delivered directly to the launch site.

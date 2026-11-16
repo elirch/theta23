@@ -1,8 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/agent-run-all?secret=theta23run2024",
-      "schedule": "0 8 * * *"
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs"
 }
